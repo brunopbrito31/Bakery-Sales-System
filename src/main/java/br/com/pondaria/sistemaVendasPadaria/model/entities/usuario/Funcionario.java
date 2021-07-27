@@ -1,109 +1,48 @@
 package br.com.pondaria.sistemaVendasPadaria.model.entities.usuario;
 
+import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.Cargo;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import javax.persistence.*;
 
-public abstract class Funcionario extends Usuario{
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Entity(name ="tb_funcionario")
+public abstract class Funcionario {
 
-    //Atributos
+    // Falta verificar o mapeamento dos geters e setters com o lombok
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String cpf;
+
+    @Column(nullable = false, unique = true)
     private String matricula;
-    private String senhaOperacional;
+
+    @Column(nullable = false)
     private String nome;
+
+    @Column(nullable = false, unique = true)
     private String telefone;
-    private Integer cargaHoraria;
+
+    @Column(nullable = false)
     private Double salario;
-    private List<LocalDateTime> horariosDePonto;
 
-    //Construtores
-    public Funcionario(String CPF, String matricula, String senhaOperacional, String nome, String telefone, Integer cargaHoraria, Double salario) {
-        super(CPF);
-        this.matricula = matricula;
-        this.senhaOperacional = senhaOperacional;
-        this.nome = nome;
-        this.telefone = telefone;
-        this.cargaHoraria = cargaHoraria;
-        this.salario = salario;
-        this.horariosDePonto = new ArrayList<>();
+    @Column(nullable = false)
+    // incluir mapeamento para string
+    private Cargo cargo;
 
-    }
+    @Column(nullable = false, unique = true)
+    private String senhaOperacional;
 
-    public Funcionario() {
+    @Column(nullable = false)
+    private Integer cargaHoraria;
 
-    }
-
-    //Getters and Setters
-    public String getMatricula() {
-        return matricula;
-    }
-
-    public void setMatricula(String matricula) {
-        this.matricula = matricula;
-    }
-
-    public String getSenhaOperacional() {
-        return senhaOperacional;
-    }
-
-    public void setSenhaOperacional(String senhaOperacional) {
-        this.senhaOperacional = senhaOperacional;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public String getTelefone() {
-        return telefone;
-    }
-
-    public void setTelefone(String telefone) {
-        this.telefone = telefone;
-    }
-
-    public Integer getCargaHoraria() {
-        return cargaHoraria;
-    }
-
-    public void setCargaHoraria(Integer cargaHoraria) {
-        this.cargaHoraria = cargaHoraria;
-    }
-
-    public Double getSalario() {
-        return salario;
-    }
-
-    public void setSalario(Double salario) {
-        this.salario = salario;
-    }
-
-    //ToString
-    @Override
-    public String toString() {
-        return "Funcionario{id=" + this.getId() +
-                ", CPF=" + this.getCPF() +
-                ", matricula='" + matricula + '\'' +
-                ", senhaOperacional='" + senhaOperacional + '\'' +
-                ", nome='" + nome + '\'' +
-                ", telefone='" + telefone + '\'' +
-                ", cargaHoraria=" + cargaHoraria +
-                ", salario=" + salario +
-                '}';
-    }
-
-    //Métodos da Classe
-    public void marcarPonto() {
-        this.horariosDePonto.add(LocalDateTime.now());
-    }
-
-    public void mostraHorariosPonto() {
-        for (LocalDateTime dataHora : horariosDePonto) {
-            System.out.println(dataHora);
-        }
-    }
+    //private List<LocalDateTime> horariosDePonto;
 }

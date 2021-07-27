@@ -1,16 +1,17 @@
-package br.com.pondaria.sistemaVendasPadaria.model.entities.venda;
+package br.com.pondaria.sistemaVendasPadaria.model.entities.deposito;
 
-import br.com.pondaria.sistemaVendasPadaria.model.entities.venda.enums.EstadoDoPedido;
-
-import java.time.LocalDateTime;
-import java.util.Objects;
 
 public class Movimentacao {
 
-    //Atributos
+    /*
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+
     private EstadoDoPedido descMovimentacao;
+
     private LocalDateTime dataHora;
+
     private Double quantidade;
 
     //Atributos de relação
@@ -93,5 +94,5 @@ public class Movimentacao {
                 ", produto=" + produto +
                 ", quantidade=" + quantidade +
                 '}';
-    }
+    }*/
 }

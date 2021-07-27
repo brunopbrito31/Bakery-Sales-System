@@ -1,38 +1,31 @@
 package br.com.pondaria.sistemaVendasPadaria.model.entities.usuario;
 
-public class Cliente extends Usuario{
-    //Setters desta classe são personalizados!
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-    //Atributos
-    private Double saldoBonus;
+import javax.persistence.*;
+import java.math.BigDecimal;
 
-    //Construtores
-    public Cliente(String CPF) {
-        super(CPF);
-        this.saldoBonus = 0.0;
+// Não está puxando os getters e setters
+@Data
+@Builder
+@Entity(name = "tb_cliente")
+@AllArgsConstructor
+@NoArgsConstructor
+public class Cliente {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private BigDecimal saldoBonus;
+
+    private String cpf;
+
+    public void acrescentaBonus(BigDecimal valor) {
+        if(saldoBonus == null) saldoBonus = BigDecimal.valueOf(0);
+        this.saldoBonus.add(valor);
     }
-
-    public Cliente() {
-        this.saldoBonus = 0.0;
-    }
-
-    //Getters
-    public Double getSaldoBonus() {
-        return saldoBonus;
-    }
-
-    //ToString
-    @Override
-    public String toString() {
-        return "Cliente{id=" + this.getId() +
-                ", CPF=" + this.getCPF() +
-                ", saldoBonus=" + saldoBonus +
-                '}';
-    }
-
-    //Métodos da classe
-    public void acrescentaBonus(double valor) {
-        this.saldoBonus += valor;
-    }
-
 }

@@ -1,21 +1,11 @@
-package br.com.pondaria.sistemaVendasPadaria.model.entities.venda;
-
-import br.com.pondaria.sistemaVendasPadaria.model.entities.venda.enums.EstadoDoPedido;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+package br.com.pondaria.sistemaVendasPadaria.model.entities.deposito;
 
 public class Estoque {
-
-    //Atributos
-    //Atributos relação
-    private List<Lote> lotes;
+/*
     private List<Movimentacao> movimentacoes;
 
-    //Construtor
-    public Estoque() {
-        this.lotes = new ArrayList<>();
+    public Estoque(){
+
     }
 
     public List<Lote> getLotes() {
@@ -54,21 +44,16 @@ public class Estoque {
         return totalItens;
     }
 
+    // implementar operação que faz busca no banco de dados
     public boolean verificaDisponibilidade (Produto produto, double quantidade) {
-        double totalItens = 0;
+        /*double totalItens = 0;
         for (Lote lote : lotes) {
             if (lote.getProduto().equals(produto)) {
                 totalItens += lote.getQuantidade();
             }
         }
         return totalItens >= quantidade;
-    }
-
-
-    public void listarLotes() {
-        for (Lote lote : lotes) {
-            System.out.println(lote);
-        }
+        return true;
     }
 
     public double addMovimentacaoRetirada(Produto produto, double quantidade) {
@@ -108,5 +93,5 @@ public class Estoque {
             return null;
         }
     }
-
+*/
 }

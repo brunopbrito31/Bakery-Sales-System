@@ -1,4 +1,4 @@
-package br.com.pondaria.sistemaVendasPadaria.model.entities.venda.enums;
+package br.com.pondaria.sistemaVendasPadaria.model.entities.enums;
 
 public enum EstadoDoPedido {
     ADICIONADO,
