@@ -1,27 +1,46 @@
 package br.com.pondaria.sistemaVendasPadaria.model.entities.deposito;
 
+import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.TipoMovimentacao;
+import br.com.pondaria.sistemaVendasPadaria.model.entities.produtos.Produto;
+import br.com.pondaria.sistemaVendasPadaria.repositories.ItemEstoqueRepository;
+import br.com.pondaria.sistemaVendasPadaria.repositories.MovimentacaoRepository;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.time.Instant;
+import java.util.List;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity(name = "tb_estoque")
 public class Estoque {
-/*
-    private List<Movimentacao> movimentacoes;
 
-    public Estoque(){
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    // adicionar o ItemEstoque e a movimentação repositories
+
+    //private List<Movimentacao> movimentacoes;
+
+    /*@OneToMany(mappedBy = "id")
+    private List<ItemEstoque> itensEstoque;*/
+
+    //pode ser uma venda ou baixa pelo padeiro
+    public void retirarItem() {
+
 
     }
+}
 
-    public List<Lote> getLotes() {
-        return lotes;
-    }
-
-    public List<Movimentacao> getMovimentacoes(){
-        return movimentacoes;
-    }
-
-    //Métodos da classe
-    public void entrada(Lote lote) {
-        this.lotes.add(lote);
-    }
-
-    //OBS: A lista mantém a ordem de entrada
+    /*//OBS: A lista mantém a ordem de entrada
     public double retirada(Produto produto, double quantidade) {
         double totalNecessario = quantidade;
         double totalItens = 0;
@@ -94,4 +113,3 @@ public class Estoque {
         }
     }
 */
-}

@@ -26,8 +26,8 @@ public class Venda {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany
-    //sintaxe para relacionar os ids
+    //verificar se não seria só id.venda
+    @OneToMany(mappedBy = "vendaPai")
     private List<ItemVenda> itensVenda;
 
     @Column(nullable = false)

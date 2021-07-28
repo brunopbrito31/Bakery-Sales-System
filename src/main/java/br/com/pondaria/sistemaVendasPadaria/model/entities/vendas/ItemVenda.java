@@ -1,6 +1,7 @@
 package br.com.pondaria.sistemaVendasPadaria.model.entities.vendas;
 import br.com.pondaria.sistemaVendasPadaria.model.entities.produtos.Produto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,11 +30,19 @@ public class ItemVenda {
     @Column(nullable = false)
     private BigDecimal vlrTotal;
 
-    //private Venda vendaPai; // fazer um mapeamento com o id de venda
+    //@JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "venda_id")
+    private Venda vendaPai; // fazer um mapeamento com o id de venda
 
     public String exibirItemVenda(){
         return produto.exibirParaVenda()+"Quantidade: "+quantidade+"\n"+
                 "Valor Total R$: "+vlrTotal+"\n";
+    }
+
+    @JsonIgnore // Para evitar que ao puxar no json eu tenha redundância
+    public Venda getVendaPai(){
+        return this.vendaPai;
     }
 
 }

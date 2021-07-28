@@ -1,14 +1,10 @@
 package br.com.pondaria.sistemaVendasPadaria.model.entities.usuario;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 
-// Não está puxando os getters e setters
 @Data
 @Builder
 @Entity(name = "tb_cliente")

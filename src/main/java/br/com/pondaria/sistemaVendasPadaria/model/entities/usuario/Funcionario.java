@@ -13,8 +13,6 @@ import javax.persistence.*;
 @Entity(name ="tb_funcionario")
 public abstract class Funcionario {
 
-    // Falta verificar o mapeamento dos geters e setters com o lombok
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -43,6 +41,7 @@ public abstract class Funcionario {
 
     @Column(nullable = false)
     private Integer cargaHoraria;
+
 
     //private List<LocalDateTime> horariosDePonto;
 }

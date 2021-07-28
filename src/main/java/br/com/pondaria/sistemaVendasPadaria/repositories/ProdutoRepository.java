@@ -4,12 +4,37 @@ import br.com.pondaria.sistemaVendasPadaria.model.entities.produtos.Produto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
+
 
 public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 
-    // Fazer só a ligação do atributo, verificar sintaxe sql ?
-    //@Query("SELECT * FROM tb_produto WHERE tb_produto.codigoBarras = ?")
-    //public Optional<Produto> verificar(String codigoBarras);*/
+
+    @Query("select count(descricao) from tb_produto " +
+            "where codigo_barras = ?1")
+    Integer verificar(String codigoBarras);
+
+    @Query("select id from tb_produto " +
+            "where codigo_barras = ?1")
+    Long buscarProdutoPeloCodigo(String codigo);
+
+    /*@Query(value = "update tb_produto " +
+            "set nome = ?1, valor_custo = ?2, peso_unitario = ?3, produto_fabricado = ?4, " +
+            "unidade_medida = ?5, valor_de_venda = ?6 " +
+            "where codigo_barras = ?7",nativeQuery = true)
+    void atualizarPeloCodigoBarras(String descricao, BigDecimal valorCusto, BigDecimal pesoUnitario,
+                                   Boolean fabricado,String unidadeMedida, BigDecimal valorVenda, String codBarras);*/
+
+
+    @Query(value = "select id, codigo_barras, nome, peso_unitario, produto_fabricado, unidade_medida, valor_custo, valor_de_venda, status from tb_produto where nome = ?1",nativeQuery = true)
+    Optional<Produto> buscarPelaDescricao(String descricao);
+
+    @Query(value = "select id, codigo_barras, nome, peso_unitario, produto_fabricado, unidade_medida, valor_custo, valor_de_venda, status from tb_produto where codigo_barras = ?1",nativeQuery = true)
+    Optional<Produto> buscarPeloCodigoBarras(String codBarras);
+
+    @Query(value = "select id, codigo_barras, nome, peso_unitario, produto_fabricado, unidade_medida, valor_custo, valor_de_venda, status from tb_produto where status= ?1",nativeQuery = true)
+    List<Produto> buscarProdutosAtivos (String status);
 
 }
