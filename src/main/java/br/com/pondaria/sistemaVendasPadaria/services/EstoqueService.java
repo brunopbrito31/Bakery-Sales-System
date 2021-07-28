@@ -1,18 +1,20 @@
 package br.com.pondaria.sistemaVendasPadaria.services;
 
-import br.com.pondaria.sistemaVendasPadaria.model.entities.deposito.Estoque;
 import br.com.pondaria.sistemaVendasPadaria.model.entities.deposito.ItemEstoque;
 import br.com.pondaria.sistemaVendasPadaria.model.entities.deposito.Movimentacao;
 import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.TipoMovimentacao;
 import br.com.pondaria.sistemaVendasPadaria.model.entities.produtos.Produto;
 import br.com.pondaria.sistemaVendasPadaria.repositories.ItemEstoqueRepository;
 import br.com.pondaria.sistemaVendasPadaria.repositories.MovimentacaoRepository;
+import org.hibernate.cache.spi.support.AbstractReadWriteAccess;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EstoqueService {
@@ -21,22 +23,41 @@ public class EstoqueService {
 
     private ItemEstoqueRepository itemEstoqueRepository;
 
-    //private Estoque estoque;
+    // Representa o estoque puxando todos os itens do estoque
+    private List<ItemEstoque>estoque;
+
+    public List<ItemEstoque>getEstoque(){
+        return estoque;
+    }
+
 
     @Autowired
     public EstoqueService(MovimentacaoRepository movimentacaoRepository, ItemEstoqueRepository itemEstoqueRepository) {
         this.movimentacaoRepository = movimentacaoRepository;
         this.itemEstoqueRepository = itemEstoqueRepository;
-        //this.estoque = estoque;
+        //this.estoque = itemEstoqueRepository.findAll();
     }
 
 
-    // Falta registrar tudo no estoque.
+    public void instanciarEstoque(){
+        estoque = itemEstoqueRepository.findAll();
+    }
+
+    public ItemEstoque buscarPorCod(String codBarras){
+        Long id = itemEstoqueRepository.verificarPorCod(codBarras);
+        Optional<ItemEstoque> itemEstoque = itemEstoqueRepository.findById(id);
+        if(!itemEstoque.isPresent()){
+            throw new IllegalArgumentException("Item de estoque não disponível ou não cadastrado");
+        }
+        return itemEstoque.get();
+    }
+
+
+
     public void movimentarItemNoEstoque(Produto produto, BigDecimal quantidade, TipoMovimentacao tipoMovimentacao) {
-        // colocar o estoque aqui
         // já existe, atualizar o item estoque existente ai , mudar o método de verificar para buscar pelo código de barras
         Movimentacao mov;
-        Long idItemEstoque = itemEstoqueRepository.verificar(produto.getId()); // verifica se já há um item de estoque do produto cadastrado no banco de dados
+        Long idItemEstoque = itemEstoqueRepository.verificarPorCod(produto.getCodigoBarras()); // verifica se já há um item de estoque do produto cadastrado no banco de dados
         if (idItemEstoque != null) { // Condição para idItemEstoque existente
             ItemEstoque itemEstoqueExistente = itemEstoqueRepository.findById(idItemEstoque).get();
             BigDecimal qtAntiga = itemEstoqueExistente.getQuantidade();
@@ -54,7 +75,7 @@ public class EstoqueService {
                 itemNovo.setAtivo(true);
                 itemNovo.setProduto(produto);
                 itemNovo.setQuantidade(quantidade);
-                //itensEstoque.add(itemNovo); verificar se há a necessidade, redundância
+                itemEstoqueRepository.save(itemNovo);
             }else{
                 throw new IllegalArgumentException("Não há o produto no estoque!");
             }

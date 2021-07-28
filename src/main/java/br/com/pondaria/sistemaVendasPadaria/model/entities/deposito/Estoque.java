@@ -1,4 +1,4 @@
-package br.com.pondaria.sistemaVendasPadaria.model.entities.deposito;
+/*package br.com.pondaria.sistemaVendasPadaria.model.entities.deposito;
 
 import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.TipoMovimentacao;
 import br.com.pondaria.sistemaVendasPadaria.model.entities.produtos.Produto;
@@ -26,12 +26,8 @@ public class Estoque {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // adicionar o ItemEstoque e a movimentação repositories
-
-    //private List<Movimentacao> movimentacoes;
-
     /*@OneToMany(mappedBy = "id")
-    private List<ItemEstoque> itensEstoque;*/
+    private List<ItemEstoque> itensEstoque;
 
     //pode ser uma venda ou baixa pelo padeiro
     public void retirarItem() {
@@ -40,7 +36,7 @@ public class Estoque {
     }
 }
 
-    /*//OBS: A lista mantém a ordem de entrada
+    //OBS: A lista mantém a ordem de entrada
     public double retirada(Produto produto, double quantidade) {
         double totalNecessario = quantidade;
         double totalItens = 0;
@@ -63,9 +59,9 @@ public class Estoque {
         return totalItens;
     }
 
-    // implementar operação que faz busca no banco de dados
+     implementar operação que faz busca no banco de dados
     public boolean verificaDisponibilidade (Produto produto, double quantidade) {
-        /*double totalItens = 0;
+        double totalItens = 0;
         for (Lote lote : lotes) {
             if (lote.getProduto().equals(produto)) {
                 totalItens += lote.getQuantidade();

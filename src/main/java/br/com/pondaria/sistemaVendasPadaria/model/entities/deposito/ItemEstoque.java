@@ -32,4 +32,9 @@ public class ItemEstoque {
     @JoinColumn(name = "estoque_id") // Verificar se esse mapeamento sobe
     private Estoque estoque;*/
 
+    // método para verificar o valor e atualizar o status do item no estoque
+    public void atualizarStatus(){
+        if(quantidade.equals(BigDecimal.valueOf(0))) this.ativo = false;
+        else this.ativo = true;
+    }
 }
