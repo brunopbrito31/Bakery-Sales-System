@@ -11,18 +11,18 @@ import java.math.BigDecimal;
 @Repository
 public interface ItemEstoqueRepository extends JpaRepository<ItemEstoque, Long> {
 
-    @Query("select id from tb_item_estoque " +
+    @Query("select id from tb_estoque " +
             "where produto_id = ?1")
     Long verificar(Long idProduto);
 
-    @Query("update tb_item_estoque " +
+    @Query("update tb_estoque " +
             "set quantidade = ?1 " +
             "where id = ?2")
     void atualizarQuantidade(BigDecimal quantidade, Long idItemEstoque);
 
-    @Query(value = "select id from tb_item_estoque t " +
-            "inner join tb_produto c " +
-            "on t.produto_id = c.id " +
-            "where c.codigo_barras = ?1",nativeQuery = true)
+    @Query(value = "select tb_estoque.id from tb_estoque " +
+            "inner join tb_produto " +
+            "on tb_estoque.produto_id = tb_produto.id " +
+            "where tb_produto.codigo_barras = ?1",nativeQuery = true)
     Long verificarPorCod(String codBarras);
 }

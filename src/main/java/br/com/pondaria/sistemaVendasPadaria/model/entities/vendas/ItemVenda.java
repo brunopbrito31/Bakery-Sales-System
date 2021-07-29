@@ -25,7 +25,7 @@ public class ItemVenda {
     private Produto produto;
 
     @Column(nullable = false)
-    private Integer quantidade;
+    private BigDecimal quantidade;
 
     @Column(nullable = false)
     private BigDecimal vlrTotal;

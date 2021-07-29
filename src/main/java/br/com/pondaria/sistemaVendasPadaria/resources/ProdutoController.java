@@ -20,12 +20,14 @@ public class ProdutoController {
         this.produtoService = service;
     }
 
+    //Feito
     @PostMapping("/cadastrar")
     @ResponseStatus(HttpStatus.CREATED)
     public MessageDTO cadastrarProduto(@RequestBody Produto produto){
         return produtoService.criarNovoProduto(produto);
     }
 
+    //Feito
     @GetMapping("/listarCadastrados")
     public List<Produto> verificarProduto(){
         return produtoService.listarProdutos();

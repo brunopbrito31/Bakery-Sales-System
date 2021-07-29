@@ -1,41 +1,114 @@
-/*package br.com.pondaria.sistemaVendasPadaria.model.entities.deposito;
+package br.com.pondaria.sistemaVendasPadaria.model.entities.deposito;
 
 import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.TipoMovimentacao;
 import br.com.pondaria.sistemaVendasPadaria.model.entities.produtos.Produto;
 import br.com.pondaria.sistemaVendasPadaria.repositories.ItemEstoqueRepository;
 import br.com.pondaria.sistemaVendasPadaria.repositories.MovimentacaoRepository;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.persistence.*;
+import javax.annotation.ManagedBean;
 import java.math.BigDecimal;
-import java.sql.Date;
+import java.util.Date;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Data
 @Builder
 @NoArgsConstructor
-@AllArgsConstructor
-@Entity(name = "tb_estoque")
+@ManagedBean
 public class Estoque {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private ItemEstoqueRepository itemEstoqueRepository;
 
-    /*@OneToMany(mappedBy = "id")
-    private List<ItemEstoque> itensEstoque;
+    private MovimentacaoRepository movimentacaoRepository;
 
-    //pode ser uma venda ou baixa pelo padeiro
-    public void retirarItem() {
+    private List<ItemEstoque> produtosArmazenados;
 
+    private List<Movimentacao> movimentacoesDoEstoque;
 
+    @Autowired
+    public Estoque(ItemEstoqueRepository itemEstoqueRepository, MovimentacaoRepository movimentacaoRepository, List<ItemEstoque> produtosArmazenados, List<Movimentacao> movimentacoesDoEstoque) {
+        this.itemEstoqueRepository = itemEstoqueRepository;
+        this.movimentacaoRepository = movimentacaoRepository;
+        this.produtosArmazenados = produtosArmazenados;
+        this.movimentacoesDoEstoque = movimentacoesDoEstoque;
+        atualizarDoBanco();
     }
-}
 
+    public void atualizarDoBanco(){
+        this.produtosArmazenados = itemEstoqueRepository.findAll();
+        this.movimentacoesDoEstoque = movimentacaoRepository.findAll();
+    }
+
+
+    public ItemEstoque verificarEstoqueProduto(Long id) {
+        Optional<ItemEstoque> itemEstoqueSelecionado = this.produtosArmazenados.stream()
+                .filter(x -> x.getProduto().getId().equals(id)).findFirst();
+        if (!itemEstoqueSelecionado.isPresent()) {
+            throw new IllegalArgumentException("Não há estoque do produto escolhido");
+        } else {
+            return itemEstoqueSelecionado.get();
+        }
+    }
+
+    public List<Movimentacao> verificarMovimentaçãoPeriodo(Date inicioPeriodo, Date fimPeriodo) {
+        // adicionar trecho de código para incluir as datas limite
+        List<Movimentacao> movimentacoesPeriodo = this.movimentacoesDoEstoque.stream()
+                .filter(x -> (x.getDataMovimentacao().before(fimPeriodo) && x.getDataMovimentacao().after(inicioPeriodo)))
+                .collect(Collectors.toList());
+
+        if (movimentacoesPeriodo.isEmpty()) {
+            throw new IllegalArgumentException("Não há movimentações no periodo selecionado");
+        } else {
+            return movimentacoesPeriodo;
+        }
+    }
+
+    public void movimentarItemNoEstoque(Produto produto, BigDecimal quantidade, TipoMovimentacao tipoMovimentacao) {
+        // já existe, atualizar o item estoque existente ai , mudar o método de verificar para buscar pelo código de barras
+        Movimentacao mov;
+        Long idItemEstoque = itemEstoqueRepository.verificarPorCod(produto.getCodigoBarras()); // verifica se já há um item de estoque do produto cadastrado no banco de dados
+        if (idItemEstoque != null) { // Condição para idItemEstoque existente
+            ItemEstoque itemEstoqueExistente = itemEstoqueRepository.findById(idItemEstoque).get();
+            BigDecimal qtAntiga = itemEstoqueExistente.getQuantidade();
+            if (tipoMovimentacao.equals(TipoMovimentacao.ENTRADA) || tipoMovimentacao.equals(TipoMovimentacao.ESTORNO)) {
+                itemEstoqueRepository.atualizarQuantidade(qtAntiga.add(quantidade), itemEstoqueExistente.getId());
+                if (itemEstoqueExistente.getAtivo() == false) itemEstoqueExistente.setAtivo(true);
+                this.produtosArmazenados = itemEstoqueRepository.findAll();
+            } else {// SAIDA o VENDA
+                if (qtAntiga.compareTo(quantidade) < 0)
+                    throw new IllegalArgumentException("Você não possui " + produto.getDescricao() + " suficiente no estoque!");
+                else
+                    itemEstoqueRepository.atualizarQuantidade(qtAntiga.add((BigDecimal.valueOf(-1d).multiply(quantidade)).add(qtAntiga)), itemEstoqueExistente.getId());
+                this.produtosArmazenados = itemEstoqueRepository.findAll();
+            }
+        } else { // Caso não haja item de estoque do produto cadastrado
+            if (tipoMovimentacao.equals(TipoMovimentacao.ENTRADA) || tipoMovimentacao.equals(TipoMovimentacao.ESTORNO)) {
+                ItemEstoque itemNovo = new ItemEstoque();
+                itemNovo.setAtivo(true);
+                itemNovo.setProduto(produto);
+                itemNovo.setQuantidade(quantidade);
+                itemEstoqueRepository.save(itemNovo); // persistindo no banco
+                this.produtosArmazenados = itemEstoqueRepository.findAll(); // atualizando a instância
+            } else {
+                throw new IllegalArgumentException("Não há o produto no estoque!");
+            }
+        }
+        mov = Movimentacao.builder().dataMovimentacao(Date.from(Instant.now())) // solução alternativa, tipo de data = LocalDate
+                .quantidade(quantidade).produtoMovimentado(produto)
+                .tipo(tipoMovimentacao).build();
+        movimentacaoRepository.save(mov); // registro da movimentação no banco de dados
+        this.movimentacoesDoEstoque = movimentacaoRepository.findAll();
+    }
+
+
+}
+/*
     //OBS: A lista mantém a ordem de entrada
     public double retirada(Produto produto, double quantidade) {
         double totalNecessario = quantidade;
@@ -108,4 +181,5 @@ public class Estoque {
             return null;
         }
     }
+
 */

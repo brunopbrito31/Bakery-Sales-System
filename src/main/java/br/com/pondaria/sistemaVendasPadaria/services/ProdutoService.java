@@ -5,11 +5,9 @@ import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.StatusProduto;
 import br.com.pondaria.sistemaVendasPadaria.model.entities.produtos.Produto;
 import br.com.pondaria.sistemaVendasPadaria.repositories.ProdutoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ProdutoService {
