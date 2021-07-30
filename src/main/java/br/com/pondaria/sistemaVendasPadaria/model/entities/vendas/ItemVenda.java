@@ -27,6 +27,7 @@ public class ItemVenda {
     @Column(nullable = false)
     private BigDecimal quantidade;
 
+    //Criar lógica para calcular o valor total automaticamente
     @Column(nullable = false)
     private BigDecimal vlrTotal;
 

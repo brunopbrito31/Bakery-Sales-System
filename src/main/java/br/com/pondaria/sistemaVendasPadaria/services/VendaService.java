@@ -1,6 +1,7 @@
 package br.com.pondaria.sistemaVendasPadaria.services;
 
 import br.com.pondaria.sistemaVendasPadaria.model.entities.dto.response.MessageDTO;
+import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.TipoMovimentacao;
 import br.com.pondaria.sistemaVendasPadaria.model.entities.vendas.ItemVenda;
 import br.com.pondaria.sistemaVendasPadaria.model.entities.vendas.Venda;
 import br.com.pondaria.sistemaVendasPadaria.repositories.ItemEstoqueRepository;
@@ -34,7 +35,7 @@ public class VendaService {
         if (venda.equals(null)) {
             return MessageDTO.builder().msg("Não é possível adicionar um produto sem inciar uma venda antes!").build();
         } else {
-            estoqueService.retirarDoEstoqueVenda(itemVenda.getProduto(), itemVenda.getQuantidade());
+            estoqueService.retirarItemNoEstoque(itemVenda.getProduto().getCodigoBarras(),itemVenda.getQuantidade(), TipoMovimentacao.VENDA);
             venda.getItensVenda().add(itemVenda);
             itemVendaRepository.save(itemVenda);
             return MessageDTO.builder().msg("Adicionado ao carrinho!").build();
@@ -67,7 +68,7 @@ public class VendaService {
 
     public MessageDTO cancelarVenda(){
         for(ItemVenda x: venda.getItensVenda()) {
-            estoqueService.estornarAoEstoque(x.getProduto(),x.getQuantidade());
+            estoqueService.adicionarItemNoEstoque(x.getProduto().getCodigoBarras(),x.getQuantidade(),TipoMovimentacao.ESTORNO);
             itemVendaRepository.delete(x);
         }
         vendaRepository.delete(this.venda);

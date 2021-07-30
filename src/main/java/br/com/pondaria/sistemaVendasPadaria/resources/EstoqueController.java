@@ -1,18 +1,18 @@
 package br.com.pondaria.sistemaVendasPadaria.resources;
 
 import br.com.pondaria.sistemaVendasPadaria.model.entities.deposito.ItemEstoque;
-import br.com.pondaria.sistemaVendasPadaria.model.entities.deposito.Movimentacao;
 import br.com.pondaria.sistemaVendasPadaria.model.entities.dto.response.MessageDTO;
-import br.com.pondaria.sistemaVendasPadaria.model.entities.produtos.Produto;
+import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.TipoMovimentacao;
 import br.com.pondaria.sistemaVendasPadaria.repositories.ProdutoRepository;
 import br.com.pondaria.sistemaVendasPadaria.services.EstoqueService;
 import br.com.pondaria.sistemaVendasPadaria.services.ProdutoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/estoque")
@@ -29,53 +29,57 @@ public class EstoqueController {
         this.produtoRepository = produtoRepository;
     }
 
-    //Feito - ok
-    @GetMapping("/exibirTodo")
-    public List<ItemEstoque> mostrarEstoque() {
-        try {
-            return estoqueService.mostrarTodosItens();
-        } catch (IllegalArgumentException e) {
-            return null;
+    @PostMapping("/adicionar/{codBarras}")
+    public MessageDTO adicionarItem(@PathVariable String codBarras, @RequestBody BigDecimal quantidade){
+        try{
+            estoqueService.adicionarItemNoEstoque(codBarras,quantidade, TipoMovimentacao.ENTRADA);
+            return MessageDTO.builder().msg("Adicionado com sucesso!").build();
+        }catch (IllegalArgumentException e){
+            return MessageDTO.builder().msg("Error: "+e.getMessage()).build();
         }
     }
 
-    // Feito - ok
-    @PostMapping("/adicionar")
-    public MessageDTO adicionarItem(@RequestBody String[] entrada) {
-        String codBarras = entrada[0];
-        BigDecimal quantidade = BigDecimal.valueOf(Double.valueOf(entrada[1]));
-        System.out.println("Valor de produto: "+codBarras);
-        System.out.println("Valor de quantidade: "+quantidade);
-
-        Produto produto = produtoService.buscarProdutoCodBarras(codBarras);
-
-        estoqueService.adicionarAoEstoque(produto, quantidade);
-        return MessageDTO.builder().msg("Produto adicionado com sucesso!").build();
-
-        /*try {
-
-        } catch (IllegalArgumentException e) {
-            return MessageDTO.builder().msg("Error: " + e.getMessage()).build();
-        }*/
+    //Uso de DeleteMapping não ocorre uma remoção
+    @PostMapping("/remover/{codBarras}")
+    public MessageDTO removerItem(@PathVariable String codBarras, @RequestBody BigDecimal quantidade){
+        try{
+            estoqueService.retirarItemNoEstoque(codBarras,quantidade, TipoMovimentacao.BAIXAINTERNA);
+            return MessageDTO.builder().msg("Removido com sucesso!").build();
+        }catch (IllegalArgumentException e){
+            return MessageDTO.builder().msg("Error: "+e.getMessage()).build();
+        }
     }
 
-    // Feito
-    @GetMapping("/exibir/{id}")
-    public ItemEstoque exibirItemEstoque(@PathVariable Long id) {
-        try {
-            return estoqueService.verificarEstoqueProduto(id);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
+    @GetMapping("/itens")
+    public List<ItemEstoque> exibirItens(){
+        return estoqueService.mostrarTodosItens();
+    }
+
+    @GetMapping("/itens/{codBarras}")
+    public ResponseEntity<ItemEstoque> mostrarItem(@PathVariable String codBarras){
+        Optional<ItemEstoque> itemEstoque = estoqueService.verificarEstoqueProduto(codBarras);
+        if(!itemEstoque.isPresent()) return ResponseEntity.notFound().build();
+        else return ResponseEntity.ok().body(itemEstoque.get());
+    }
+
+
+    /*
+
+    // Feito - Testar
+    @GetMapping("/exibir/{codBarras}")
+    public ResponseEntity<ItemEstoque> exibirItemEstoque(@PathVariable String codBarras) {
+        Optional<ItemEstoque> itemEstoqueSelecionado = estoqueService.verificarEstoqueProduto(codBarras);
+        if(!itemEstoqueSelecionado.isPresent()) return ResponseEntity.notFound().build();
+        else return ResponseEntity.ok().body(itemEstoqueSelecionado.get());
     }
 
     //Feito -- Testar depois
-    @GetMapping("/movimentacao/{d1}to{d2}")
+    /*@GetMapping("/movimentacao/{d1}to{d2}")
     public List<Movimentacao> verificarMovPeriodo(@PathVariable Date d1, @PathVariable Date d2) {
         try {
             return estoqueService.verificarMovPeriodo(d1, d2);
         } catch (IllegalArgumentException e) {
             return null;
         }
-    }
+    }*/
 }

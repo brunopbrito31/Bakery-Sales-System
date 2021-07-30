@@ -54,5 +54,19 @@ public class Produto {
                 "Valor por "+getPesoUnitario()+" R$:"+getValorDeVenda()+"\n";
     }
 
+    public String exibirCadastro(){
+        String exibicao=
+                "Id: "+id+"\n"+
+                "Descrição: "+descricao+"\n"+
+                "Valor de Custo R$: "+valorCusto+"\n"+
+                "Peso Unitário: "+pesoUnitario+" "+unidadeMedida+"\n"+
+                "Código de Barras: "+codigoBarras+"\n"+
+                "Valor de Venda R$: "+valorDeVenda+"\n"+
+                "Status do Cadastro: "+status;
+                if(produtoFabricado) exibicao = exibicao.concat("+\n"+"Produto Caseiro");
+
+                return exibicao;
+    }
+
 
 }
