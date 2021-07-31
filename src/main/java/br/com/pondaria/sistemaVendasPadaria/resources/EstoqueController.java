@@ -68,7 +68,7 @@ public class EstoqueController {
     }
 
     @GetMapping("/relatorio/movimentacoes/{inicio}/{fim}")
-    public ResponseEntity<List<Movimentacao>> filtrarMovimentacoes(String inicio, String fim){
+    public ResponseEntity<List<Movimentacao>> filtrarMovimentacoes(@PathVariable String inicio, @PathVariable String fim){
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         try {
             Date dataInicio = sdf.parse(inicio);
@@ -78,10 +78,5 @@ public class EstoqueController {
             return ResponseEntity.badRequest().build();
         }
     }
-
-
-
-
-
 
 }

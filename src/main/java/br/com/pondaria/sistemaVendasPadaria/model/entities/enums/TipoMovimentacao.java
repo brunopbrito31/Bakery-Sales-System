@@ -5,7 +5,8 @@ public enum TipoMovimentacao {
     ENTRADA("entrada"),
     BAIXAINTERNA("baixainterna"),
     ESTORNO("estorno"),
-    VENDA("venda");
+    VENDA("venda"),
+    FABRICACAO("fabricao");
 
     private String movimentacaoSelecionada;
 

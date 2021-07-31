@@ -44,9 +44,6 @@ public class Produto {
     @Column(name = "status", nullable = false)
     private StatusProduto status;
 
-    // verificar lógica para ativar a lista de insumos e relacionar com o id de produto
-    //private List<String> CodInsumos; // lógica para instanciar a lista
-
     public String exibirParaVenda(){
         return "Código de Barras: "+getCodigoBarras()+"\n"+
         "Descrição: "+getDescricao()+"\n"+
