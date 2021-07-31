@@ -1,13 +1,11 @@
 package br.com.pondaria.sistemaVendasPadaria.resources;
 
 import br.com.pondaria.sistemaVendasPadaria.model.entities.dto.response.MessageDTO;
-import br.com.pondaria.sistemaVendasPadaria.model.entities.vendas.ItemVenda;
 import br.com.pondaria.sistemaVendasPadaria.model.entities.vendas.Venda;
 import br.com.pondaria.sistemaVendasPadaria.services.VendaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.annotation.SessionScope;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -33,9 +31,13 @@ public class VendaController {
     // ok Testar, poderia ser um DeletMapping?
     @GetMapping("/cancelarvenda")
     public MessageDTO cancelarVendaAtual(){
-        return vendaService.cancelarVenda();
+        try{
+            return vendaService.cancelarVenda();
+        }catch (IllegalArgumentException e){
+            return MessageDTO.builder().msg(e.getMessage()).build();
+        }
     }
-    //ok Testar
+
     @GetMapping("/finalizarvenda")
     public MessageDTO finalizarVendaAtual(){
         try{
@@ -47,14 +49,21 @@ public class VendaController {
 
     @PostMapping("/carrinhoatual/adicionarProduto/{codBarras}")
     public MessageDTO adicionarProduto(@PathVariable String codBarras,@RequestBody BigDecimal quantidade){
-        return vendaService.adicionarItemVenda(codBarras,quantidade);
+        try{
+            return vendaService.adicionarItemVenda(codBarras,quantidade);
+        }catch (IllegalArgumentException e){
+            return MessageDTO.builder().msg(e.getMessage()).build();
+        }
     }
 
     @PostMapping("/carrinhoatual/retirarproduto/{codBarras}")
     public MessageDTO removerProduto(@PathVariable String codBarras, @RequestBody BigDecimal quantidade){
-        return vendaService.removerItens(codBarras,quantidade);
+        try{
+            return vendaService.removerItens(codBarras,quantidade);
+        }catch (IllegalArgumentException e){
+            return MessageDTO.builder().msg(e.getMessage()).build();
+        }
     }
-
 
     @GetMapping("/listarVendas")
     public ResponseEntity<List<Venda>> retornarVendas(){
@@ -70,12 +79,10 @@ public class VendaController {
         return ResponseEntity.ok().body(opVenda.get());
     }
 
-
     @GetMapping("/carrinhoAtual")
-    public ResponseEntity<List<ItemVenda>> mostrarCarrinho(){
-        List<ItemVenda> itensVenda = vendaService.listarProdutos();
+    public ResponseEntity<List<String>> mostrarCarrinho(){
+        List<String> itensVenda = vendaService.listarProdutos();
         if(itensVenda.isEmpty()) return ResponseEntity.notFound().build();
         return ResponseEntity.ok().body(itensVenda);
     }
-
 }

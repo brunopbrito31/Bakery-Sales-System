@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.SessionAttribute;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class VendaService {
@@ -31,8 +32,8 @@ public class VendaService {
     @Autowired
     public VendaService
             (VendaRepository vendaRepository, ItemVendaRepository itemVendaRepository,
-            ItemEstoqueRepository itemEstoqueRepository,
-            ProdutoRepository produtoRepository, EstoqueService estoqueService, @SessionAttribute("venda") Venda venda)
+             ItemEstoqueRepository itemEstoqueRepository,
+             ProdutoRepository produtoRepository, @SessionAttribute("estoqueService") EstoqueService estoqueService, Venda venda)
     {
         this.vendaRepository = vendaRepository;
         this.itemVendaRepository = itemVendaRepository;
@@ -44,11 +45,11 @@ public class VendaService {
     }
 
     public MessageDTO adicionarItemVenda(String codBarras, BigDecimal quantidade) {
-        if (this.venda.equals(null)) return MessageDTO.builder().msg("Não é possível adicionar um produto sem inciar uma venda antes!").build();
+        if (this.vendasIniciadas.equals(0)) return MessageDTO.builder().msg("Não é possível adicionar um produto sem inciar uma venda antes!").build();
         if(quantidade.compareTo(BigDecimal.valueOf(0)) < 0) return MessageDTO.builder().msg("Quantidade Inválida!").build();
         Optional<Produto> produto = produtoRepository.buscarPeloCodigoBarras(codBarras);
         if (!produto.isPresent()) return MessageDTO.builder().msg("Produto inválido").build();
-        Optional<ItemVenda> itemVendaExistente = this.venda.getItensVenda().stream().filter(x -> x.getProduto().equals(produto)).findFirst();
+        Optional<ItemVenda> itemVendaExistente = this.venda.getItensVenda().stream().filter(x -> x.getProduto().getCodigoBarras().equals(produto.get().getCodigoBarras())).findFirst();
         if(itemVendaExistente.isPresent()){
             estoqueService.retirarItemNoEstoque(codBarras,quantidade,TipoMovimentacao.VENDA);
             itemVendaExistente.get().setQuantidade(itemVendaExistente.get().getQuantidade().add(quantidade));
@@ -74,11 +75,11 @@ public class VendaService {
     }
 
     public MessageDTO removerItens(String codBarras, BigDecimal quantidade) {
-        if (this.venda.equals(null)) return MessageDTO.builder().msg("Não é possível adicionar um produto sem inciar uma venda antes!").build();
+        if (this.vendasIniciadas.equals(0)) return MessageDTO.builder().msg("Não é possível remover um produto sem inciar uma venda antes!").build();
         if(quantidade.compareTo(BigDecimal.valueOf(0)) < 0) return MessageDTO.builder().msg("Quantidade Inválida!").build();
         Optional<Produto> produto = produtoRepository.buscarPeloCodigoBarras(codBarras);
         if (!produto.isPresent()) return MessageDTO.builder().msg("Produto inválido").build();
-        Optional<ItemVenda> itemVendaExistente = this.venda.getItensVenda().stream().filter(x -> x.getProduto().equals(produto)).findFirst();
+        Optional<ItemVenda> itemVendaExistente = this.venda.getItensVenda().stream().filter(x -> x.getProduto().getCodigoBarras().equals(produto.get().getCodigoBarras())).findFirst();
         if(itemVendaExistente.isPresent()){
             if(quantidade.compareTo(itemVendaExistente.get().getQuantidade()) > 0) return MessageDTO.builder()
                     .msg("Não é possível retirar mais itens do que possui no carrinho!").build();
@@ -117,12 +118,22 @@ public class VendaService {
         }
     }
 
+    public BigDecimal valorTotalComp(){
+        BigDecimal total = BigDecimal.valueOf(0);
+        for(ItemVenda x: venda.getItensVenda()){
+            total = total.add(x.getVlrTotal());
+        }
+        return total;
+    }
+
     // ok
     public MessageDTO confirmarVenda() {
         if(vendasIniciadas.equals(0)) return MessageDTO.builder().msg("Não há vendas abertas").build();
         itemVendaRepository.saveAll(venda.getItensVenda());
+        vendasIniciadas = 0;
         return MessageDTO.builder().msg("Venda Confirmada \n" +
-                "Valor Total R$: "+ venda.getValorTotal()).build();
+                "Valor Total R$: "+ valorTotalComp()).build();
+
     }
 
     // ok
@@ -137,9 +148,9 @@ public class VendaService {
     }
 
     // ok
-    public List<ItemVenda> listarProdutos(){
+    public List<String> listarProdutos(){
         if(this.venda.equals(null)) throw new IllegalArgumentException("Não há venda iniciada!");
-        else return this.venda.getItensVenda();
+        else return this.venda.getItensVenda().stream().map(x -> x.exibirParaVenda()).collect(Collectors.toList());
     }
 
 }

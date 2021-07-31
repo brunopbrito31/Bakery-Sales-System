@@ -46,4 +46,10 @@ public class ItemVenda {
         return this.vendaPai;
     }
 
+    public String exibirParaVenda(){
+        return "Descricao: "+produto.getDescricao()+"\n"+
+                "Quantidade: "+quantidade+"\n"+
+                "Valor R$: "+vlrTotal+"\n";
+    }
+
 }

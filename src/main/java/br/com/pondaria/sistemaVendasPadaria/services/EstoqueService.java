@@ -9,6 +9,7 @@ import br.com.pondaria.sistemaVendasPadaria.repositories.MovimentacaoRepository;
 import br.com.pondaria.sistemaVendasPadaria.repositories.ProdutoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.annotation.SessionScope;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@SessionScope
 public class EstoqueService {
 
     private ItemEstoqueRepository itemEstoqueRepository;
