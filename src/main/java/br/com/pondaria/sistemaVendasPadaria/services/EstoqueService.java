@@ -13,9 +13,11 @@ import org.springframework.web.context.annotation.SessionScope;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @SessionScope
@@ -50,7 +52,7 @@ public class EstoqueService {
     }
 
     public void adicionarItemNoEstoque(String codProduto, BigDecimal quantidade, TipoMovimentacao tipoMovimentacao) {
-        if(quantidade.compareTo(BigDecimal.valueOf(0)) <= 0 ) throw new IllegalArgumentException("Quantidade inválida");
+        if (quantidade.compareTo(BigDecimal.valueOf(0)) <= 0) throw new IllegalArgumentException("Quantidade inválida");
         Produto produtoTeste = produtoRepository.buscarPeloCodigoBarras(codProduto).get(); // Pegar o produto que será movimentado
         Movimentacao movimentacao;
         if (produtoTeste.getStatus().equals("INATIVO"))
@@ -85,7 +87,7 @@ public class EstoqueService {
     }
 
     public void retirarItemNoEstoque(String codProduto, BigDecimal quantidade, TipoMovimentacao tipoMovimentacao) {
-        if(quantidade.compareTo(BigDecimal.valueOf(0)) <= 0 ) throw new IllegalArgumentException("Quantidade inválida");
+        if (quantidade.compareTo(BigDecimal.valueOf(0)) <= 0) throw new IllegalArgumentException("Quantidade inválida");
         Optional<ItemEstoque> itemEstoqueTeste = this.verificarEstoqueProduto(codProduto);
         if (itemEstoqueTeste.isPresent()) { //Se o produto já existir o produto no estoque
             ItemEstoque itemEstoqueExistente = itemEstoqueTeste.get();
@@ -122,9 +124,20 @@ public class EstoqueService {
     }
 
 
-    /*public List<Movimentacao> verificarMovPeriodo(Date inicio, Date fim) throws IllegalArgumentException {
-        return estoque.verificarMovimentaçãoPeriodo(inicio, fim);
-    }*/
+    public List<Movimentacao> filtrarMovimentacoesData(Date inicio, Date fim){
+        List<Movimentacao> movimentacoes = movimentacaoRepository.findAll();
+        List<Movimentacao> movimentacoess = movimentacoes.stream()
+                .filter(x -> (x.getDataMovimentacao().after(inicio) && x.getDataMovimentacao().before(fim))).collect(Collectors.toList());
+        return movimentacoess;
+    }
+
+    public List<Movimentacao> filtraSaidasVendas(Date inicio, Date fim){
+        List<Movimentacao> movimentacoes = movimentacaoRepository.findAll();
+        List<Movimentacao> movimentacoess = movimentacoes.stream()
+                .filter(x -> (x.getDataMovimentacao().after(inicio) && x.getDataMovimentacao().before(fim))).collect(Collectors.toList())
+                .stream().filter(x -> x.getTipo().equals(TipoMovimentacao.VENDA)).collect(Collectors.toList());
+        return movimentacoess;
+    }
 
     private void sincronizarComBanco() {
         this.produtosArmazenados = itemEstoqueRepository.findAll();

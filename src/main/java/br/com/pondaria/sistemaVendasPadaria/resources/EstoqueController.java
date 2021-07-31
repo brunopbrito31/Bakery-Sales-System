@@ -1,6 +1,7 @@
 package br.com.pondaria.sistemaVendasPadaria.resources;
 
 import br.com.pondaria.sistemaVendasPadaria.model.entities.deposito.ItemEstoque;
+import br.com.pondaria.sistemaVendasPadaria.model.entities.deposito.Movimentacao;
 import br.com.pondaria.sistemaVendasPadaria.model.entities.dto.response.MessageDTO;
 import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.TipoMovimentacao;
 import br.com.pondaria.sistemaVendasPadaria.repositories.ProdutoRepository;
@@ -11,6 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Optional;
 
@@ -63,24 +67,21 @@ public class EstoqueController {
         else return ResponseEntity.ok().body(itemEstoque.get());
     }
 
-
-    /*
-
-    // Feito - Testar
-    @GetMapping("/exibir/{codBarras}")
-    public ResponseEntity<ItemEstoque> exibirItemEstoque(@PathVariable String codBarras) {
-        Optional<ItemEstoque> itemEstoqueSelecionado = estoqueService.verificarEstoqueProduto(codBarras);
-        if(!itemEstoqueSelecionado.isPresent()) return ResponseEntity.notFound().build();
-        else return ResponseEntity.ok().body(itemEstoqueSelecionado.get());
+    @GetMapping("/relatorio/movimentacoes/{inicio}/{fim}")
+    public ResponseEntity<List<Movimentacao>> filtrarMovimentacoes(String inicio, String fim){
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        try {
+            Date dataInicio = sdf.parse(inicio);
+            Date dataFim = sdf.parse(fim);
+            return ResponseEntity.ok().body(estoqueService.filtrarMovimentacoesData(dataInicio,dataFim));
+        } catch (ParseException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
-    //Feito -- Testar depois
-    /*@GetMapping("/movimentacao/{d1}to{d2}")
-    public List<Movimentacao> verificarMovPeriodo(@PathVariable Date d1, @PathVariable Date d2) {
-        try {
-            return estoqueService.verificarMovPeriodo(d1, d2);
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
-    }*/
+
+
+
+
+
 }
