@@ -37,73 +37,79 @@ public class EstoqueService {
         this.produtoRepository = produtoRepository;
         this.produtosArmazenados = produtosArmazenados;
         this.movimentacoesDoEstoque = movimentacoesDoEstoque;
+        sincronizarComBanco();
     }
 
     // ok - Testar
     public Optional<ItemEstoque> verificarEstoqueProduto(String codBarras) {
-        Long idProduto =itemEstoqueRepository.verificarPorCod(codBarras);
-        Optional<ItemEstoque> itemEstoqueSelecionado = itemEstoqueRepository.findById(idProduto);
-        if(!itemEstoqueSelecionado.isPresent()) return null;
+        Optional<ItemEstoque> itemEstoqueSelecionado = itemEstoqueRepository.buscarItemEstoquePeloCodProduto(codBarras);
+        if (!itemEstoqueSelecionado.isPresent()) return null; // pensar na lógica de criar um estoque
         return itemEstoqueSelecionado;
     }
 
-    // Comporta a situação de estorno e de adição
-    public void adicionarItemNoEstoque(String codProduto, BigDecimal quantidade, TipoMovimentacao tipoMovimentacao){
-        Optional<ItemEstoque> itemEstoqueTeste = this.verificarEstoqueProduto(codProduto);
-        if(itemEstoqueTeste.isPresent()){ //Se o produto já existir o produto no estoque
-            ItemEstoque itemEstoqueExistente = itemEstoqueTeste.get();
-            if(itemEstoqueExistente.getProduto().getStatus().equals("INATIVO")){
-                throw new IllegalArgumentException("Não é possível adicionar produtos sem um cadastro ativo!");
-            }else{
-                BigDecimal quantidadeAntiga = itemEstoqueExistente.getQuantidade();
-                if(quantidadeAntiga.equals(0)) itemEstoqueExistente.setAtivo(true);
-                itemEstoqueExistente.setQuantidade(quantidadeAntiga.add(quantidade));
-                itemEstoqueRepository.atualizarQuantidade(itemEstoqueExistente.getQuantidade(),itemEstoqueExistente.getId());
-                Movimentacao mov = new Movimentacao(null,tipoMovimentacao,Date.from(Instant.now()), itemEstoqueExistente.getProduto(),quantidade);
-                movimentacaoRepository.save(mov);
-                this.sincronizarComBanco();
-            }
-        }else{ // Caso não exista o produto no estoque
-            Optional<Produto> produtoTeste = produtoRepository.buscarPeloCodigoBarras(codProduto);
-            if(!produtoTeste.isPresent()) throw new IllegalArgumentException("Produto não está cadastrado");
-            else if(produtoTeste.get().getStatus().equals("INATIVO")) throw new IllegalArgumentException ("Não é possível adicionar produtos em um cadastro ativo!");
-            else{
-                Produto produto = produtoRepository.buscarPeloCodigoBarras(codProduto).get();
-                ItemEstoque itemEstoqueNovo = new ItemEstoque(null,produto,quantidade,true);
-                itemEstoqueRepository.save(itemEstoqueNovo);
-                Movimentacao mov = new Movimentacao(null,tipoMovimentacao,Date.from(Instant.now()),itemEstoqueNovo.getProduto(),quantidade);
-                movimentacaoRepository.save(mov);
-                this.sincronizarComBanco();
-            }
+    public void adicionarItemNoEstoque(String codProduto, BigDecimal quantidade, TipoMovimentacao tipoMovimentacao) {
+        if(quantidade.compareTo(BigDecimal.valueOf(0)) <= 0 ) throw new IllegalArgumentException("Quantidade inválida");
+        Produto produtoTeste = produtoRepository.buscarPeloCodigoBarras(codProduto).get(); // Pegar o produto que será movimentado
+        Movimentacao movimentacao;
+        if (produtoTeste.getStatus().equals("INATIVO"))
+            throw new IllegalArgumentException("Não pode manipular um produto que está com o cadastro desativado");
+        Optional<ItemEstoque> itemTeste = itemEstoqueRepository.buscarItemEstoquePeloCodProduto(codProduto);
+        if (itemTeste.isPresent()) { // Caso já haja um item de estoque com o produto escolhido
+            BigDecimal qtdAntiga = itemTeste.get().getQuantidade();
+            itemTeste.get().setQuantidade(qtdAntiga.add(quantidade));
+            itemTeste.get().setAtivo(true);
+            itemEstoqueRepository.atualizarQuantidade(itemTeste.get().getQuantidade(), itemTeste.get().getId());
+            movimentacao = Movimentacao.builder()
+                    .dataMovimentacao(Date.from(Instant.now()))
+                    .produtoMovimentado(produtoTeste)
+                    .quantidade(quantidade)
+                    .tipo(tipoMovimentacao)
+                    .build();
+        } else { // ------------------  Caso não haja um item de estoque com o produto escolhido
+            ItemEstoque itemEstoqueNovo = ItemEstoque.builder()
+                    .quantidade(quantidade)
+                    .produto(produtoTeste)
+                    .ativo(true).build();
+            itemEstoqueRepository.save(itemEstoqueNovo);
+            movimentacao = Movimentacao.builder()
+                    .dataMovimentacao(Date.from(Instant.now()))
+                    .produtoMovimentado(produtoTeste)
+                    .quantidade(quantidade)
+                    .tipo(tipoMovimentacao)
+                    .build();
         }
+        movimentacaoRepository.save(movimentacao);
+        sincronizarComBanco();
     }
 
-    //Comporta a situação de saida para venda e baixa interna
-    public void retirarItemNoEstoque(String codProduto, BigDecimal quantidade, TipoMovimentacao tipoMovimentacao){
+    public void retirarItemNoEstoque(String codProduto, BigDecimal quantidade, TipoMovimentacao tipoMovimentacao) {
+        if(quantidade.compareTo(BigDecimal.valueOf(0)) <= 0 ) throw new IllegalArgumentException("Quantidade inválida");
         Optional<ItemEstoque> itemEstoqueTeste = this.verificarEstoqueProduto(codProduto);
-        if(itemEstoqueTeste.isPresent()){ //Se o produto já existir o produto no estoque
+        if (itemEstoqueTeste.isPresent()) { //Se o produto já existir o produto no estoque
             ItemEstoque itemEstoqueExistente = itemEstoqueTeste.get();
-            if(itemEstoqueExistente.getProduto().getStatus().equals("INATIVO")){
+            if (itemEstoqueExistente.getProduto().getStatus().equals("INATIVO")) {
                 throw new IllegalArgumentException("Não é possível remover produtos sem um cadastro ativo!");
-            }else{
+            } else {
                 BigDecimal quantidadeAntiga = itemEstoqueExistente.getQuantidade();
-                Integer validacaoSaldoQt = quantidadeAntiga.compareTo(quantidade);
-                if(validacaoSaldoQt < 0) throw new IllegalArgumentException("Não há produtos suficientes: "+quantidadeAntiga);
-                else if(validacaoSaldoQt == 0){
+                int validacaoSaldoQt = quantidadeAntiga.compareTo(quantidade);
+                if (validacaoSaldoQt < 0)
+                    throw new IllegalArgumentException("Não há produtos suficientes: " + quantidadeAntiga);
+                else if (validacaoSaldoQt == 0) {
+                    itemEstoqueExistente.setQuantidade(BigDecimal.valueOf(0));
                     itemEstoqueExistente.setAtivo(false);
-                }else{
+                } else {
                     itemEstoqueExistente.setQuantidade(quantidadeAntiga.add(quantidade.multiply(BigDecimal.valueOf(-1)))); // Realizando a subtração
-                    itemEstoqueRepository.atualizarQuantidade(itemEstoqueExistente.getQuantidade(),itemEstoqueExistente.getId());
-                    Movimentacao mov = new Movimentacao(null,tipoMovimentacao,Date.from(Instant.now()), itemEstoqueExistente.getProduto(),quantidade);
+                    itemEstoqueRepository.atualizarQuantidade(itemEstoqueExistente.getQuantidade(), itemEstoqueExistente.getId());
+                    Movimentacao mov = new Movimentacao(null, tipoMovimentacao, Date.from(Instant.now()), itemEstoqueExistente.getProduto(), quantidade);
                     movimentacaoRepository.save(mov);
                     this.sincronizarComBanco();
                 }
-                itemEstoqueRepository.atualizarQuantidade(itemEstoqueExistente.getQuantidade(),itemEstoqueExistente.getId());
-                Movimentacao mov = new Movimentacao(null,tipoMovimentacao,Date.from(Instant.now()), itemEstoqueExistente.getProduto(),quantidade);
+                itemEstoqueRepository.atualizarQuantidade(itemEstoqueExistente.getQuantidade(), itemEstoqueExistente.getId());
+                Movimentacao mov = new Movimentacao(null, tipoMovimentacao, Date.from(Instant.now()), itemEstoqueExistente.getProduto(), quantidade);
                 movimentacaoRepository.save(mov);
                 this.sincronizarComBanco();
             }
-        }else{ // Caso não exista o produto no estoque
+        } else { // Caso não exista o produto no estoque
             throw new IllegalArgumentException("Produto não está no estoque!");
         }
     }
@@ -118,7 +124,7 @@ public class EstoqueService {
         return estoque.verificarMovimentaçãoPeriodo(inicio, fim);
     }*/
 
-    private void sincronizarComBanco(){
+    private void sincronizarComBanco() {
         this.produtosArmazenados = itemEstoqueRepository.findAll();
         this.movimentacoesDoEstoque = movimentacaoRepository.findAll();
     }

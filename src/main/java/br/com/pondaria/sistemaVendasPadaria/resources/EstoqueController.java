@@ -23,9 +23,9 @@ public class EstoqueController {
     private ProdutoRepository produtoRepository; // passsar para a camada de service depois
 
     @Autowired
-    EstoqueController(EstoqueService estoqueService, ProdutoRepository produtoRepository, ProdutoService produtoService) {
-        this.produtoService = produtoService;
+    public EstoqueController(EstoqueService estoqueService, ProdutoService produtoService, ProdutoRepository produtoRepository) {
         this.estoqueService = estoqueService;
+        this.produtoService = produtoService;
         this.produtoRepository = produtoRepository;
     }
 
@@ -39,7 +39,6 @@ public class EstoqueController {
         }
     }
 
-    //Uso de DeleteMapping não ocorre uma remoção
     @PostMapping("/remover/{codBarras}")
     public MessageDTO removerItem(@PathVariable String codBarras, @RequestBody BigDecimal quantidade){
         try{
@@ -51,8 +50,10 @@ public class EstoqueController {
     }
 
     @GetMapping("/itens")
-    public List<ItemEstoque> exibirItens(){
-        return estoqueService.mostrarTodosItens();
+    public ResponseEntity<List<ItemEstoque>> exibirItens(){
+        List<ItemEstoque> tdsEstoque = estoqueService.mostrarTodosItens();
+        if(tdsEstoque.isEmpty()) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok().body(estoqueService.mostrarTodosItens());
     }
 
     @GetMapping("/itens/{codBarras}")
