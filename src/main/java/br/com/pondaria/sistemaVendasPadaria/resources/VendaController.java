@@ -7,6 +7,7 @@ import br.com.pondaria.sistemaVendasPadaria.services.VendaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.annotation.SessionScope;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -19,31 +20,42 @@ public class VendaController {
     private VendaService vendaService;
 
     @Autowired
-    public VendaController(VendaService vendaService) {
+    public VendaController(@SessionAttribute("vendaService") VendaService vendaService) {
         this.vendaService = vendaService;
     }
 
     // ok Testar
-    @GetMapping("/iniciarVenda")
+    @GetMapping("/iniciarvenda")
     public MessageDTO iniciarVenda(){
         return vendaService.iniciarVenda();
     }
 
     // ok Testar, poderia ser um DeletMapping?
-    @GetMapping("/cancelarVenda")
+    @GetMapping("/cancelarvenda")
     public MessageDTO cancelarVendaAtual(){
         return vendaService.cancelarVenda();
     }
+    //ok Testar
+    @GetMapping("/finalizarvenda")
+    public MessageDTO finalizarVendaAtual(){
+        try{
+            return vendaService.confirmarVenda();
+        }catch (IllegalArgumentException e){
+            return MessageDTO.builder().msg("Error: "+e.getMessage()).build();
+        }
+    }
 
-    // ok - Testar
     @PostMapping("/carrinhoatual/adicionarProduto/{codBarras}")
     public MessageDTO adicionarProduto(@PathVariable String codBarras,@RequestBody BigDecimal quantidade){
         return vendaService.adicionarItemVenda(codBarras,quantidade);
     }
 
-    // implementar remover produto
+    @PostMapping("/carrinhoatual/retirarproduto/{codBarras}")
+    public MessageDTO removerProduto(@PathVariable String codBarras, @RequestBody BigDecimal quantidade){
+        return vendaService.removerItens(codBarras,quantidade);
+    }
 
-    // ok - Testar
+
     @GetMapping("/listarVendas")
     public ResponseEntity<List<Venda>> retornarVendas(){
         List<Venda> vendas = vendaService.retornarVendas();
@@ -51,7 +63,6 @@ public class VendaController {
         return ResponseEntity.ok().body(vendas);
     }
 
-    // ok - Testar
     @GetMapping("/listarVendas/{id}")
     public ResponseEntity<Venda> listarVendaEspecifica(@PathVariable Long id){
         Optional<Venda> opVenda = vendaService.retornarVenda(id);
