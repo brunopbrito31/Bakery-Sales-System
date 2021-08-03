@@ -1,7 +1,7 @@
 package br.com.pondaria.sistemaVendasPadaria.resources;
 
 import br.com.pondaria.sistemaVendasPadaria.model.entities.dto.response.MessageDTO;
-import br.com.pondaria.sistemaVendasPadaria.model.entities.produtos.Produto;
+import br.com.pondaria.sistemaVendasPadaria.model.entities.products.Product;
 import br.com.pondaria.sistemaVendasPadaria.services.ProdutoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,41 +27,41 @@ public class ProdutoController {
     //Feito - ok -> existe alguma validação para produtos fabricados?
     @PostMapping("/cadastrar")
     @ResponseStatus(HttpStatus.CREATED)
-    public MessageDTO cadastrarProduto(@RequestBody Produto produto){
-        return produtoService.criarNovoProduto(produto);
+    public MessageDTO cadastrarProduto(@RequestBody Product product){
+        return produtoService.criarNovoProduto(product);
     }
 
     //Lista os produtos cadastrados
     @GetMapping("/exibirtodos")
-    public List<Produto> verificarProduto(){
+    public List<Product> verificarProduto(){
         return produtoService.listarProdutos();
     }
 
     //Busca um produto pela descrição
     @GetMapping("/buscarpordescricao/{descricao}")
-    public ResponseEntity<Produto> buscarPorDescricao(@PathVariable String descricao){
-        Optional<Produto> produtoBuscado = produtoService.buscarProdutoDescricao(descricao);
+    public ResponseEntity<Product> buscarPorDescricao(@PathVariable String descricao){
+        Optional<Product> produtoBuscado = produtoService.buscarProdutoDescricao(descricao);
         if(produtoBuscado.isPresent()) return ResponseEntity.ok().body(produtoBuscado.get());
         else return ResponseEntity.notFound().build();
     }
 
     //Busca um produto pelo código de barras
     @GetMapping("/buscarporcodigobarras/{codBarras}")
-    public ResponseEntity<Produto> buscarPorCodBarras(@PathVariable String codBarras){
-        Optional<Produto> produtoBuscado = produtoService.buscarProdutoCodBarras(codBarras);
+    public ResponseEntity<Product> buscarPorCodBarras(@PathVariable String codBarras){
+        Optional<Product> produtoBuscado = produtoService.buscarProdutoCodBarras(codBarras);
         if(produtoBuscado.isPresent()) return ResponseEntity.ok().body(produtoBuscado.get());
         else return ResponseEntity.notFound().build();
     }
 
     //Lista os produtos ativos
     @GetMapping("/listarativos")
-    public List<Produto> listarProdutosAtivos(){
+    public List<Product> listarProdutosAtivos(){
         return produtoService.buscarProdutosAtivos();
     }
 
     //Lista os produtos inativos
     @GetMapping("/listarinativos")
-    public List<Produto> listarProdutosInativos(){
+    public List<Product> listarProdutosInativos(){
         return produtoService.buscarProdutosInativos();
     }
 
@@ -73,8 +73,8 @@ public class ProdutoController {
 
     //Atualiza o produto do código de barras digitado pelo produto entregue como parâmetro
     @PutMapping("/atualizar/{codBarras}")
-    public MessageDTO atualizarProduto(@PathVariable String codBarras, @RequestBody Produto novoProduto){
-        return produtoService.atualizarProdutoInteiro(codBarras,novoProduto);
+    public MessageDTO atualizarProduto(@PathVariable String codBarras, @RequestBody Product novoProduct){
+        return produtoService.atualizarProdutoInteiro(codBarras, novoProduct);
     }
 
     // QUEBROU O SQL

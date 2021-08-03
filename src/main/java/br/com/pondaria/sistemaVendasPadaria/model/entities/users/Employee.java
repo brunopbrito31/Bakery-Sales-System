@@ -1,17 +1,18 @@
 package br.com.pondaria.sistemaVendasPadaria.model.entities.users;
 
-import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.Cargo;
+import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.Position;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name ="tb_funcionario")
-public abstract class Funcionario {
+@Entity(name ="tb_employees")
+public abstract class Employee {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,28 +21,22 @@ public abstract class Funcionario {
     @Column(nullable = false, unique = true)
     private String cpf;
 
-    @Column(nullable = false, unique = true)
-    private String matricula;
+    @Column(name = "employee_registry",nullable = false, unique = true)
+    private String registry;
 
     @Column(nullable = false)
-    private String nome;
-
-    @Column(nullable = false, unique = true)
-    private String telefone;
-
-    @Column(nullable = false)
-    private Double salario;
-
-    @Column(nullable = false)
-    // incluir mapeamento para string
-    private Cargo cargo;
+    private String name;
 
     @Column(nullable = false, unique = true)
-    private String senhaOperacional;
+    private String phone;
 
     @Column(nullable = false)
-    private Integer cargaHoraria;
+    private BigDecimal salary;
 
+    @Column(nullable = false)
+    @Enumerated(value = EnumType.STRING)
+    private Position position;
 
-    //private List<LocalDateTime> horariosDePonto;
+    @Column(name = "operational_password",nullable = false, unique = true)
+    private String operationalPassword;
 }

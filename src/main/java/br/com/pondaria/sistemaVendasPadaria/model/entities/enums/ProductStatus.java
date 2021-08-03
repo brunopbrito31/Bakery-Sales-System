@@ -1,13 +1,13 @@
 package br.com.pondaria.sistemaVendasPadaria.model.entities.enums;
 
-public enum StatusProduto {
+public enum ProductStatus {
 
-    ATIVO("ativo"),
-    INATIVO("inativo");
+    ACTIVE("active"),
+    INACTIVE("inactive");
 
-    private String statusSelecionado;
+    private String selectedStatus;
 
-    private StatusProduto(String status) {
-        this.statusSelecionado = status;
+    private ProductStatus(String status) {
+        this.selectedStatus = status;
     }
 }

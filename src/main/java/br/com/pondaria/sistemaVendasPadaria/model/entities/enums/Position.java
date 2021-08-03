@@ -1,14 +1,15 @@
 package br.com.pondaria.sistemaVendasPadaria.model.entities.enums;
 
-public enum Cargo {
-    ADMINISTRADOR("administrador"),
-    ESTOQUISTA("estoquista"),
-    VENDEDOR("vendedor"),
-    PADEIRO("padeiro");
+public enum Position {
 
-    private String cargoSelecionado;
+    MANAGER("manager"),
+    STOCKIST("stockist"),
+    SELLER("seller"),
+    BAKER("baker");
 
-    private Cargo(String cargo) {
-        this.cargoSelecionado = cargo;
+    private String selectedPosition;
+
+    private Position(String position) {
+        this.selectedPosition = position;
     }
 }

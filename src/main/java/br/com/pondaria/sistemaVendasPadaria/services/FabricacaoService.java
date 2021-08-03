@@ -1,9 +1,9 @@
 package br.com.pondaria.sistemaVendasPadaria.services;
 
-import br.com.pondaria.sistemaVendasPadaria.model.entities.deposito.ItemEstoque;
-import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.TipoMovimentacao;
+import br.com.pondaria.sistemaVendasPadaria.model.entities.deposit.StockItem;
+import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.MovementType;
 import br.com.pondaria.sistemaVendasPadaria.model.entities.fabricacao.Insumo;
-import br.com.pondaria.sistemaVendasPadaria.model.entities.produtos.Produto;
+import br.com.pondaria.sistemaVendasPadaria.model.entities.products.Product;
 import br.com.pondaria.sistemaVendasPadaria.repositories.InsumoRepository;
 import br.com.pondaria.sistemaVendasPadaria.repositories.ItemEstoqueRepository;
 import br.com.pondaria.sistemaVendasPadaria.repositories.ProdutoRepository;
@@ -39,43 +39,43 @@ public class FabricacaoService {
         this.estoqueService = estoqueService;
     }
 
-    public Produto fabricarProduto(String codBarrasProdutoAlvo){
+    public Product fabricarProduto(String codBarrasProdutoAlvo){
         List<Insumo> insumos = insumoRepository.metodoParaBuscarTodosInsumosDoProduto(codBarrasProdutoAlvo);
         int requisitos = 0;
         for(Insumo x: insumos){
-            Optional<ItemEstoque> itemEstoque = itemEstoqueRepository.buscarItemEstoquePeloCodProduto(x.getCodigoBarras());
+            Optional<StockItem> itemEstoque = itemEstoqueRepository.buscarItemEstoquePeloCodProduto(x.getCodigoBarras());
             if(itemEstoque.isPresent()){
                 BigDecimal quantidadeNoEstoque = itemEstoque.get().getQuantidade();
                 if(x.getQuantidade().compareTo(itemEstoque.get().getQuantidade()) >= 0){
                     requisitos = requisitos;
                 }
                 else{
-                    estoqueService.retirarItemNoEstoque(x.getCodigoBarras(),x.getQuantidade(), TipoMovimentacao.BAIXAINTERNA);
+                    estoqueService.retirarItemNoEstoque(x.getCodigoBarras(),x.getQuantidade(), MovementType.BAIXAINTERNA);
                     requisitos++;
                 }
             }
         }
         if(requisitos == insumos.size()){
-            Produto produtoCriado = produtoRepository.buscarPeloCodigoBarras(codBarrasProdutoAlvo).get();
-            estoqueService.adicionarItemNoEstoque(codBarrasProdutoAlvo,BigDecimal.valueOf(1),TipoMovimentacao.FABRICACAO);
-            return produtoCriado;
+            Product productCriado = produtoRepository.buscarPeloCodigoBarras(codBarrasProdutoAlvo).get();
+            estoqueService.adicionarItemNoEstoque(codBarrasProdutoAlvo,BigDecimal.valueOf(1), MovementType.FABRICACAO);
+            return productCriado;
         }else{
             throw new IllegalArgumentException("Você não possui todos os itens em estoque para permanecer com a fabricação");
         }
     }
 
     public Insumo associarUmInsumo(String codBarrasProdutoCaseiro, String codBarrasInsumo) {
-        Optional<Produto> prod = produtoRepository.buscarPeloCodigoBarras(codBarrasProdutoCaseiro);
+        Optional<Product> prod = produtoRepository.buscarPeloCodigoBarras(codBarrasProdutoCaseiro);
         if (prod.isPresent()) {
             if(prod.get().getProdutoFabricado().equals(false)) throw new IllegalArgumentException("Produto não caseiro");
             if (prod.get().getStatus().equals("INATIVO")) {
                 throw new IllegalArgumentException("Não é possível trabalhar com produto que não está com o cadastro ativo");
             } else {
-                Optional<ItemEstoque> itemEstoqueProcuradoAntes = itemEstoqueRepository.buscarItemEstoquePeloCodProduto(codBarrasProdutoCaseiro);
+                Optional<StockItem> itemEstoqueProcuradoAntes = itemEstoqueRepository.buscarItemEstoquePeloCodProduto(codBarrasProdutoCaseiro);
                 if (!itemEstoqueProcuradoAntes.isPresent())
                     throw new IllegalArgumentException("Não há o produto no estoque");
                 else {
-                    ItemEstoque itemEstoqueProcurado = itemEstoqueProcuradoAntes.get();
+                    StockItem stockItemProcurado = itemEstoqueProcuradoAntes.get();
                     return Insumo.builder().codigoBarrasProdutoPai(codBarrasProdutoCaseiro).codigoBarras(codBarrasInsumo).build();
                 }
             }

@@ -1,6 +1,6 @@
 package br.com.pondaria.sistemaVendasPadaria.repositories;
 
-import br.com.pondaria.sistemaVendasPadaria.model.entities.produtos.Produto;
+import br.com.pondaria.sistemaVendasPadaria.model.entities.products.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ProdutoRepository extends JpaRepository<Produto, Long> {
+public interface ProdutoRepository extends JpaRepository<Product, Long> {
 
 
     @Query("select count(descricao) from tb_produto " +
@@ -53,12 +53,12 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 
 
     @Query(value = "select id, codigo_barras, nome, peso_unitario, produto_fabricado, unidade_medida, valor_custo, valor_de_venda, status from tb_produto where nome = ?1", nativeQuery = true)
-    Optional<Produto> buscarPelaDescricao(String descricao);
+    Optional<Product> buscarPelaDescricao(String descricao);
 
     @Query(value = "select id, codigo_barras, nome, peso_unitario, produto_fabricado, unidade_medida, valor_custo, valor_de_venda, status from tb_produto where codigo_barras = ?1", nativeQuery = true)
-    Optional<Produto> buscarPeloCodigoBarras(String codBarras);
+    Optional<Product> buscarPeloCodigoBarras(String codBarras);
 
     @Query(value = "select id, codigo_barras, nome, peso_unitario, produto_fabricado, unidade_medida, valor_custo, valor_de_venda, status from tb_produto where status= ?1", nativeQuery = true)
-    List<Produto> buscarProdutosAtivos(String status);
+    List<Product> buscarProdutosAtivos(String status);
 
 }

@@ -1,7 +1,7 @@
 package br.com.pondaria.sistemaVendasPadaria.resources;
 
 import br.com.pondaria.sistemaVendasPadaria.model.entities.dto.response.MessageDTO;
-import br.com.pondaria.sistemaVendasPadaria.model.entities.vendas.Venda;
+import br.com.pondaria.sistemaVendasPadaria.model.entities.sales.Sale;
 import br.com.pondaria.sistemaVendasPadaria.services.VendaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -66,15 +66,15 @@ public class VendaController {
     }
 
     @GetMapping("/listarVendas")
-    public ResponseEntity<List<Venda>> retornarVendas(){
-        List<Venda> vendas = vendaService.retornarVendas();
+    public ResponseEntity<List<Sale>> retornarVendas(){
+        List<Sale> vendas = vendaService.retornarVendas();
         if(vendas.isEmpty()) return ResponseEntity.notFound().build();
         return ResponseEntity.ok().body(vendas);
     }
 
     @GetMapping("/listarVendas/{id}")
-    public ResponseEntity<Venda> listarVendaEspecifica(@PathVariable Long id){
-        Optional<Venda> opVenda = vendaService.retornarVenda(id);
+    public ResponseEntity<Sale> listarVendaEspecifica(@PathVariable Long id){
+        Optional<Sale> opVenda = vendaService.retornarVenda(id);
         if(!opVenda.isPresent()) return ResponseEntity.notFound().build();
         return ResponseEntity.ok().body(opVenda.get());
     }

@@ -1,9 +1,9 @@
 package br.com.pondaria.sistemaVendasPadaria.services;
 
-import br.com.pondaria.sistemaVendasPadaria.model.entities.deposito.ItemEstoque;
-import br.com.pondaria.sistemaVendasPadaria.model.entities.deposito.Movimentacao;
-import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.TipoMovimentacao;
-import br.com.pondaria.sistemaVendasPadaria.model.entities.produtos.Produto;
+import br.com.pondaria.sistemaVendasPadaria.model.entities.deposit.StockItem;
+import br.com.pondaria.sistemaVendasPadaria.model.entities.deposit.Movement;
+import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.MovementType;
+import br.com.pondaria.sistemaVendasPadaria.model.entities.products.Product;
 import br.com.pondaria.sistemaVendasPadaria.repositories.ItemEstoqueRepository;
 import br.com.pondaria.sistemaVendasPadaria.repositories.MovimentacaoRepository;
 import br.com.pondaria.sistemaVendasPadaria.repositories.ProdutoRepository;
@@ -28,13 +28,13 @@ public class EstoqueService {
 
     private ProdutoRepository produtoRepository;
 
-    private List<ItemEstoque> produtosArmazenados;
+    private List<StockItem> produtosArmazenados;
 
-    private List<Movimentacao> movimentacoesDoEstoque;
+    private List<Movement> movimentacoesDoEstoque;
 
 
     @Autowired
-    public EstoqueService(ItemEstoqueRepository itemEstoqueRepository, MovimentacaoRepository movimentacaoRepository, ProdutoRepository produtoRepository, List<ItemEstoque> produtosArmazenados, List<Movimentacao> movimentacoesDoEstoque) {
+    public EstoqueService(ItemEstoqueRepository itemEstoqueRepository, MovimentacaoRepository movimentacaoRepository, ProdutoRepository produtoRepository, List<StockItem> produtosArmazenados, List<Movement> movimentacoesDoEstoque) {
         this.itemEstoqueRepository = itemEstoqueRepository;
         this.movimentacaoRepository = movimentacaoRepository;
         this.produtoRepository = produtoRepository;
@@ -44,71 +44,71 @@ public class EstoqueService {
     }
 
     // ok - Testar
-    public Optional<ItemEstoque> verificarEstoqueProduto(String codBarras) {
-        Optional<ItemEstoque> itemEstoqueSelecionado = itemEstoqueRepository.buscarItemEstoquePeloCodProduto(codBarras);
+    public Optional<StockItem> verificarEstoqueProduto(String codBarras) {
+        Optional<StockItem> itemEstoqueSelecionado = itemEstoqueRepository.buscarItemEstoquePeloCodProduto(codBarras);
         if (!itemEstoqueSelecionado.isPresent()) return null; // pensar na lógica de criar um estoque
         return itemEstoqueSelecionado;
     }
 
-    public void adicionarItemNoEstoque(String codProduto, BigDecimal quantidade, TipoMovimentacao tipoMovimentacao) {
+    public void adicionarItemNoEstoque(String codProduto, BigDecimal quantidade, MovementType movementType) {
         if (quantidade.compareTo(BigDecimal.valueOf(0)) <= 0) throw new IllegalArgumentException("Quantidade inválida");
-        Produto produtoTeste = produtoRepository.buscarPeloCodigoBarras(codProduto).get(); // Pegar o produto que será movimentado
-        Movimentacao movimentacao;
-        if (produtoTeste.getStatus().equals("INATIVO"))
+        Product productTeste = produtoRepository.buscarPeloCodigoBarras(codProduto).get(); // Pegar o produto que será movimentado
+        Movement movimentacao;
+        if (productTeste.getStatus().equals("INATIVO"))
             throw new IllegalArgumentException("Não pode manipular um produto que está com o cadastro desativado");
-        Optional<ItemEstoque> itemTeste = itemEstoqueRepository.buscarItemEstoquePeloCodProduto(codProduto);
+        Optional<StockItem> itemTeste = itemEstoqueRepository.buscarItemEstoquePeloCodProduto(codProduto);
         if (itemTeste.isPresent()) { // Caso já haja um item de estoque com o produto escolhido
             BigDecimal qtdAntiga = itemTeste.get().getQuantidade();
             itemTeste.get().setQuantidade(qtdAntiga.add(quantidade));
             itemTeste.get().setAtivo(true);
             itemEstoqueRepository.atualizarQuantidade(itemTeste.get().getQuantidade(), itemTeste.get().getId());
-            movimentacao = Movimentacao.builder()
+            movimentacao = Movement.builder()
                     .dataMovimentacao(Date.from(Instant.now()))
-                    .produtoMovimentado(produtoTeste)
+                    .productMovimentado(productTeste)
                     .quantidade(quantidade)
-                    .tipo(tipoMovimentacao)
+                    .tipo(movementType)
                     .build();
         } else { // ------------------  Caso não haja um item de estoque com o produto escolhido
-            ItemEstoque itemEstoqueNovo = ItemEstoque.builder()
+            StockItem stockItemNovo = StockItem.builder()
                     .quantidade(quantidade)
-                    .produto(produtoTeste)
+                    .product(productTeste)
                     .ativo(true).build();
-            itemEstoqueRepository.save(itemEstoqueNovo);
-            movimentacao = Movimentacao.builder()
+            itemEstoqueRepository.save(stockItemNovo);
+            movimentacao = Movement.builder()
                     .dataMovimentacao(Date.from(Instant.now()))
-                    .produtoMovimentado(produtoTeste)
+                    .productMovimentado(productTeste)
                     .quantidade(quantidade)
-                    .tipo(tipoMovimentacao)
+                    .tipo(movementType)
                     .build();
         }
         movimentacaoRepository.save(movimentacao);
         sincronizarComBanco();
     }
 
-    public void retirarItemNoEstoque(String codProduto, BigDecimal quantidade, TipoMovimentacao tipoMovimentacao) {
+    public void retirarItemNoEstoque(String codProduto, BigDecimal quantidade, MovementType movementType) {
         if (quantidade.compareTo(BigDecimal.valueOf(0)) <= 0) throw new IllegalArgumentException("Quantidade inválida");
-        Optional<ItemEstoque> itemEstoqueTeste = this.verificarEstoqueProduto(codProduto);
+        Optional<StockItem> itemEstoqueTeste = this.verificarEstoqueProduto(codProduto);
         if (itemEstoqueTeste.isPresent()) { //Se o produto já existir o produto no estoque
-            ItemEstoque itemEstoqueExistente = itemEstoqueTeste.get();
-            if (itemEstoqueExistente.getProduto().getStatus().equals("INATIVO")) {
+            StockItem stockItemExistente = itemEstoqueTeste.get();
+            if (stockItemExistente.getProduct().getStatus().equals("INATIVO")) {
                 throw new IllegalArgumentException("Não é possível remover produtos sem um cadastro ativo!");
             } else {
-                BigDecimal quantidadeAntiga = itemEstoqueExistente.getQuantidade();
+                BigDecimal quantidadeAntiga = stockItemExistente.getQuantidade();
                 int validacaoSaldoQt = quantidadeAntiga.compareTo(quantidade);
                 if (validacaoSaldoQt < 0)
                     throw new IllegalArgumentException("Não há produtos suficientes: " + quantidadeAntiga);
                 else if (validacaoSaldoQt == 0) {
-                    itemEstoqueExistente.setQuantidade(BigDecimal.valueOf(0));
-                    itemEstoqueExistente.setAtivo(false);
+                    stockItemExistente.setQuantidade(BigDecimal.valueOf(0));
+                    stockItemExistente.setAtivo(false);
                 } else {
-                    itemEstoqueExistente.setQuantidade(quantidadeAntiga.add(quantidade.multiply(BigDecimal.valueOf(-1)))); // Realizando a subtração
-                    itemEstoqueRepository.atualizarQuantidade(itemEstoqueExistente.getQuantidade(), itemEstoqueExistente.getId());
-                    Movimentacao mov = new Movimentacao(null, tipoMovimentacao, Date.from(Instant.now()), itemEstoqueExistente.getProduto(), quantidade);
+                    stockItemExistente.setQuantidade(quantidadeAntiga.add(quantidade.multiply(BigDecimal.valueOf(-1)))); // Realizando a subtração
+                    itemEstoqueRepository.atualizarQuantidade(stockItemExistente.getQuantidade(), stockItemExistente.getId());
+                    Movement mov = new Movement(null, movementType, Date.from(Instant.now()), stockItemExistente.getProduct(), quantidade);
                     movimentacaoRepository.save(mov);
                     this.sincronizarComBanco();
                 }
-                itemEstoqueRepository.atualizarQuantidade(itemEstoqueExistente.getQuantidade(), itemEstoqueExistente.getId());
-                Movimentacao mov = new Movimentacao(null, tipoMovimentacao, Date.from(Instant.now()), itemEstoqueExistente.getProduto(), quantidade);
+                itemEstoqueRepository.atualizarQuantidade(stockItemExistente.getQuantidade(), stockItemExistente.getId());
+                Movement mov = new Movement(null, movementType, Date.from(Instant.now()), stockItemExistente.getProduct(), quantidade);
                 movimentacaoRepository.save(mov);
                 this.sincronizarComBanco();
             }
@@ -118,23 +118,23 @@ public class EstoqueService {
     }
 
 
-    public List<ItemEstoque> mostrarTodosItens() {
+    public List<StockItem> mostrarTodosItens() {
         return itemEstoqueRepository.findAll();
     }
 
 
-    public List<Movimentacao> filtrarMovimentacoesData(Date inicio, Date fim){
-        List<Movimentacao> movimentacoes = movimentacaoRepository.findAll();
-        List<Movimentacao> movimentacoess = movimentacoes.stream()
+    public List<Movement> filtrarMovimentacoesData(Date inicio, Date fim){
+        List<Movement> movimentacoes = movimentacaoRepository.findAll();
+        List<Movement> movimentacoess = movimentacoes.stream()
                 .filter(x -> (x.getDataMovimentacao().after(inicio) && x.getDataMovimentacao().before(fim))).collect(Collectors.toList());
         return movimentacoess;
     }
 
-    public List<Movimentacao> filtraSaidasVendas(Date inicio, Date fim){
-        List<Movimentacao> movimentacoes = movimentacaoRepository.findAll();
-        List<Movimentacao> movimentacoess = movimentacoes.stream()
+    public List<Movement> filtraSaidasVendas(Date inicio, Date fim){
+        List<Movement> movimentacoes = movimentacaoRepository.findAll();
+        List<Movement> movimentacoess = movimentacoes.stream()
                 .filter(x -> (x.getDataMovimentacao().after(inicio) && x.getDataMovimentacao().before(fim))).collect(Collectors.toList())
-                .stream().filter(x -> x.getTipo().equals(TipoMovimentacao.VENDA)).collect(Collectors.toList());
+                .stream().filter(x -> x.getTipo().equals(MovementType.VENDA)).collect(Collectors.toList());
         return movimentacoess;
     }
 

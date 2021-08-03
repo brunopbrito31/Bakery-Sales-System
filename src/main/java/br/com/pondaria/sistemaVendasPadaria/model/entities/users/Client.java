@@ -7,21 +7,23 @@ import java.math.BigDecimal;
 
 @Data
 @Builder
-@Entity(name = "tb_cliente")
+@Entity(name = "tb_clients")
 @AllArgsConstructor
 @NoArgsConstructor
-public class Cliente {
+public class Client {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private BigDecimal saldoBonus;
+    @Column(name = "bonus_balance")
+    private BigDecimal bonusBalance;
 
+    @Column(name = "cpf")
     private String cpf;
 
-    public void acrescentaBonus(BigDecimal valor) {
-        if(saldoBonus == null) saldoBonus = BigDecimal.valueOf(0);
-        this.saldoBonus.add(valor);
+    public void addBonus(BigDecimal bonusValue) {
+        if(bonusBalance == null) bonusBalance = BigDecimal.valueOf(0);
+        this.bonusBalance.add(bonusValue);
     }
 }

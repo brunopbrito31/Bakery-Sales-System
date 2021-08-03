@@ -1,5 +1,7 @@
-package br.com.pondaria.sistemaVendasPadaria.model.entities.vendas;
+package br.com.pondaria.sistemaVendasPadaria.model.entities.sales;
 
+import br.com.pondaria.sistemaVendasPadaria.exceptions.SaleException;
+import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,36 +20,56 @@ import java.util.List;
 @Component
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "tb_venda")
-public class Venda {
+@Entity(name = "tb_sale")
+public class Sale {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    //verificar se não seria só id.venda
-    @OneToMany(mappedBy = "vendaPai")
-    private List<ItemVenda> itensVenda;
+    @OneToMany(mappedBy = "fatherSale")
+    private List<ItemSale> salesItems;
 
     @Column(nullable = false)
-    private BigDecimal valorTotal;
+    private BigDecimal totalValue;
 
     @Column(nullable = false)
-    private Date dataHora;
+    private Date startMoment;
 
-    // incrementar e finalizar através do service
-    public static Venda abrirVenda() {
-        //Inserir validação com senha de caixa.
-        Venda vendaIniciada = new Venda(null, new ArrayList<>(), BigDecimal.valueOf(0d), Date.from(Instant.now())); // verificar a possibilidade de trocar para LocalDateTime
-        return vendaIniciada;
+    @Column
+    private Date completeMoment;
+
+    @Column
+    private OrderStatus orderStatus;
+
+    public static Sale saleStart() {
+        Sale startedSale = new Sale(null, new ArrayList<>(), BigDecimal.valueOf(0d), Date.from(Instant.now()),null,OrderStatus.STARTED); // verificar a possibilidade de trocar para LocalDateTime
+        return startedSale;
     }
 
-    // corrigir método
-    /*public void exibir(){
-        this.getItensVenda().stream().map(x -> x.exibirItemVenda()).collect(Collectors.toList()).forEach(System.out::println);
-    }*/
+    public void finishSale(){
+        if(orderStatus.equals(null) || (!orderStatus.equals(OrderStatus.STARTED) && orderStatus.equals(OrderStatus.INPROGRESS))){
+            throw new SaleException("Finish sale is just possible in status of sale in progress or started!");
+        }
+        this.orderStatus = OrderStatus.FINISH;
+        this.setCompleteMoment(Date.from(Instant.now()));
+    }
 
-    public void atualizarValorTotal(ItemVenda itemVenda) {
-        valorTotal = valorTotal.add(itemVenda.getVlrTotal());
+    public void cancelSale(){
+        if(orderStatus.equals(null) || (!orderStatus.equals(OrderStatus.STARTED) && !orderStatus.equals(OrderStatus.INPROGRESS))){
+            throw new SaleException("Cancel sale  is just possible in status of sale in progress or started!");
+        }
+        this.orderStatus = OrderStatus.CANCELED;
+        this.setCompleteMoment(Date.from(Instant.now()));
+    }
+
+    public void addItem(ItemSale itemSale){
+        if(orderStatus.equals(null) || (!orderStatus.equals(OrderStatus.INPROGRESS) && !orderStatus.equals(OrderStatus.STARTED))){
+            throw new SaleException("Not is possible add a item before sale start");
+        }else {
+            if(orderStatus.equals(OrderStatus.STARTED)) orderStatus = OrderStatus.INPROGRESS;
+            this.salesItems.add(itemSale);
+            this.setTotalValue(totalValue.add(itemSale.getTotalvalue()));
+        }
     }
 }

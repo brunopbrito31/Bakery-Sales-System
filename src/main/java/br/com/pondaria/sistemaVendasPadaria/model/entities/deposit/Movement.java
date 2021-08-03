@@ -1,8 +1,8 @@
-package br.com.pondaria.sistemaVendasPadaria.model.entities.deposito;
+package br.com.pondaria.sistemaVendasPadaria.model.entities.deposit;
 
 
 import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.MovementType;
-import br.com.pondaria.sistemaVendasPadaria.model.entities.produtos.Product;
+import br.com.pondaria.sistemaVendasPadaria.model.entities.products.Product;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

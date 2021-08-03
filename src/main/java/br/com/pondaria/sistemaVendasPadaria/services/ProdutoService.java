@@ -1,8 +1,8 @@
 package br.com.pondaria.sistemaVendasPadaria.services;
 
 import br.com.pondaria.sistemaVendasPadaria.model.entities.dto.response.MessageDTO;
-import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.StatusProduto;
-import br.com.pondaria.sistemaVendasPadaria.model.entities.produtos.Produto;
+import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.ProductStatus;
+import br.com.pondaria.sistemaVendasPadaria.model.entities.products.Product;
 import br.com.pondaria.sistemaVendasPadaria.repositories.ProdutoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,45 +20,45 @@ public class ProdutoService {
         repository = produtoRepository;
     }
 
-    public MessageDTO criarNovoProduto (Produto produto){
-        if(verificarExistencia(produto)) return MessageDTO.builder().msg("Produto já existente").build();
-        else if(produto.getStatus().equals(StatusProduto.INATIVO)) return MessageDTO.builder().msg("Status inválido!").build();
+    public MessageDTO criarNovoProduto (Product product){
+        if(verificarExistencia(product)) return MessageDTO.builder().msg("Produto já existente").build();
+        else if(product.getStatus().equals(ProductStatus.INATIVO)) return MessageDTO.builder().msg("Status inválido!").build();
         else{
-            repository.save(produto);
+            repository.save(product);
             return MessageDTO.builder().msg("Produto Criado com Sucesso!").build();
         }
     }
 
-    public List<Produto> listarProdutos(){
+    public List<Product> listarProdutos(){
         return repository.findAll();
     }
 
-    private Boolean verificarExistencia(Produto produto){
-        Integer verificacaoNoBanco = repository.verificar(produto.getCodigoBarras());
+    private Boolean verificarExistencia(Product product){
+        Integer verificacaoNoBanco = repository.verificar(product.getCodigoBarras());
         if(verificacaoNoBanco != null && verificacaoNoBanco > 0) return true;
         else return false;
     }
 
-    public List<Produto> buscarProdutosAtivos(){
-        return repository.buscarProdutosAtivos(String.valueOf(StatusProduto.ATIVO));
+    public List<Product> buscarProdutosAtivos(){
+        return repository.buscarProdutosAtivos(String.valueOf(ProductStatus.ATIVO));
     }
 
-    public List<Produto> buscarProdutosInativos(){
-        return repository.buscarProdutosAtivos(String.valueOf(StatusProduto.INATIVO));
+    public List<Product> buscarProdutosInativos(){
+        return repository.buscarProdutosAtivos(String.valueOf(ProductStatus.INATIVO));
     }
 
-    public Optional<Produto> buscarProdutoDescricao(String descricao){
-        Optional<Produto> produtoBuscado = repository.buscarPelaDescricao(descricao);
+    public Optional<Product> buscarProdutoDescricao(String descricao){
+        Optional<Product> produtoBuscado = repository.buscarPelaDescricao(descricao);
         return produtoBuscado;
     }
 
-    public Optional<Produto> buscarProdutoCodBarras(String codBarras){
-        Optional<Produto> produtoBuscado = repository.buscarPeloCodigoBarras(codBarras);
+    public Optional<Product> buscarProdutoCodBarras(String codBarras){
+        Optional<Product> produtoBuscado = repository.buscarPeloCodigoBarras(codBarras);
         return produtoBuscado;
     }
 
     public MessageDTO atualizarProdutoDescricao(String codBarras, String novaDescricao) {
-        Optional<Produto> produtoBuscado = repository.buscarPeloCodigoBarras(codBarras);
+        Optional<Product> produtoBuscado = repository.buscarPeloCodigoBarras(codBarras);
         if(!produtoBuscado.isPresent()) return MessageDTO.builder().msg("Produto não cadastrado").build();
         else{
             repository.atualizarDescricaoProduto(novaDescricao,codBarras);
@@ -67,20 +67,20 @@ public class ProdutoService {
         }
     }
 
-    public MessageDTO atualizarProdutoInteiro(String codBarras, Produto novoProduto) {
-        Optional<Produto> produtoBuscado = repository.buscarPeloCodigoBarras(codBarras);
+    public MessageDTO atualizarProdutoInteiro(String codBarras, Product novoProduct) {
+        Optional<Product> produtoBuscado = repository.buscarPeloCodigoBarras(codBarras);
         if(!produtoBuscado.isPresent()) return MessageDTO.builder().msg("Produto não cadastrado").build();
         else{
-            repository.atualizarProdutoInteiro(novoProduto.getDescricao(),novoProduto.getValorCusto(),
-                    novoProduto.getPesoUnitario(),novoProduto.getProdutoFabricado(),novoProduto.getUnidadeMedida(),
-                    novoProduto.getValorDeVenda(),codBarras);
+            repository.atualizarProdutoInteiro(novoProduct.getDescricao(), novoProduct.getValorCusto(),
+                    novoProduct.getPesoUnitario(), novoProduct.getProductFabricado(), novoProduct.getUnidadeMedida(),
+                    novoProduct.getValorDeVenda(),codBarras);
             return MessageDTO.builder().msg("Atualização realizada com sucesso!").build();
         }
     }
 
     //método para inativar um produto
     public MessageDTO inativarCadastroProduto(String codBarras){
-        Optional<Produto> produtoBuscado = repository.buscarPeloCodigoBarras(codBarras);
+        Optional<Product> produtoBuscado = repository.buscarPeloCodigoBarras(codBarras);
         if(!produtoBuscado.isPresent()) return MessageDTO.builder().msg("Produto não cadastrado").build();
         else if(produtoBuscado.get().getStatus().equals("INATIVO")) return MessageDTO.builder().msg("Produto já está inativo").build();
         else{
@@ -90,7 +90,7 @@ public class ProdutoService {
     }
 
     public MessageDTO ativarCadastroProduto(String codBarras){
-        Optional<Produto> produtoBuscado = repository.buscarPeloCodigoBarras(codBarras);
+        Optional<Product> produtoBuscado = repository.buscarPeloCodigoBarras(codBarras);
         if(!produtoBuscado.isPresent()) return MessageDTO.builder().msg("Produto não cadastrado").build();
         else if(produtoBuscado.get().getStatus().equals("ATIVO")) return MessageDTO.builder().msg("Produto já está ativo").build();
         else{
@@ -98,5 +98,14 @@ public class ProdutoService {
             return MessageDTO.builder().msg("Cadastro do produto foi ativado").build();
         }
     }
+
+    /*public MessageDTO criarNovoProduto (Produto produto){ // backup de cadastar produto
+        if(verificarExistencia(produto)) return MessageDTO.builder().msg("Produto já existente").build();
+        else if(produto.getStatus().equals(StatusProduto.INATIVO)) return MessageDTO.builder().msg("Status inválido!").build();
+        else{
+            repository.save(produto);
+            return MessageDTO.builder().msg("Produto Criado com Sucesso!").build();
+        }
+    }*/
 
 }

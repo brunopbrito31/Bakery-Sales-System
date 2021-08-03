@@ -1,11 +1,11 @@
-package br.com.pondaria.sistemaVendasPadaria.model.entities.vendas;
-import br.com.pondaria.sistemaVendasPadaria.model.entities.products.Product;
+package br.com.pondaria.sistemaVendasPadaria.model.entities.sales;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import br.com.pondaria.sistemaVendasPadaria.model.entities.products.Product;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -14,42 +14,42 @@ import java.math.BigDecimal;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "tb_item_venda")
-public class ItemVenda {
+@Entity(name = "tb_item_sale")
+public class ItemSale {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne
+    @JoinColumn(name = "product_id")
     private Product product;
 
     @Column(nullable = false)
-    private BigDecimal quantidade;
+    private BigDecimal quantity;
 
-    //Criar lógica para calcular o valor total automaticamente
     @Column(nullable = false)
-    private BigDecimal vlrTotal;
+    private BigDecimal totalvalue;
 
     //@JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "venda_id")
-    private Venda vendaPai; // fazer um mapeamento com o id de venda
+    @JoinColumn(name = "sale_id")
+    private Sale fatherSale;
 
-    public String exibirItemVenda(){
-        return product.exibirParaVenda()+"Quantidade: "+quantidade+"\n"+
-                "Valor Total R$: "+vlrTotal+"\n";
+    // Criação do item de venda
+    public static ItemSale createItemSale(Product product, BigDecimal quantity, Sale sale){
+        return ItemSale.builder()
+                .fatherSale(sale)
+                .quantity(quantity)
+                .product(product)
+                .totalvalue(product.getSaleValue().multiply(quantity))
+                .build();
     }
 
-    @JsonIgnore // Para evitar que ao puxar no json eu tenha redundância
-    public Venda getVendaPai(){
-        return this.vendaPai;
-    }
+    //Criar método para exibir item para venda
 
-    public String exibirParaVenda(){
-        return "Descricao: "+ product.getDescricao()+"\n"+
-                "Quantidade: "+quantidade+"\n"+
-                "Valor R$: "+vlrTotal+"\n";
-    }
+    //@JsonIgnore // Para evitar que ao puxar no json eu tenha redundância
+    //método get da venda pai
 
+    // método para exibir itemVenda no carrinho
 }

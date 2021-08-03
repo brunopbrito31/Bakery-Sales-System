@@ -1,4 +1,4 @@
-package br.com.pondaria.sistemaVendasPadaria.model.entities.produtos;
+package br.com.pondaria.sistemaVendasPadaria.model.entities.products;
 
 import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.ProductStatus;
 import lombok.AllArgsConstructor;
