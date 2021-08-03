@@ -3,7 +3,7 @@ package br.com.pondaria.sistemaVendasPadaria.services;
 import br.com.pondaria.sistemaVendasPadaria.model.entities.dto.response.MessageDTO;
 import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.ProductStatus;
 import br.com.pondaria.sistemaVendasPadaria.model.entities.products.Product;
-import br.com.pondaria.sistemaVendasPadaria.repositories.ProdutoRepository;
+import br.com.pondaria.sistemaVendasPadaria.repositories.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,13 +11,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ProdutoService {
+public class ProductService {
 
-    private ProdutoRepository repository;
+    private ProductRepository repository;
 
     @Autowired
-    public ProdutoService(ProdutoRepository produtoRepository){
-        repository = produtoRepository;
+    public ProductService(ProductRepository productRepository){
+        repository = productRepository;
     }
 
     public MessageDTO criarNovoProduto (Product product){

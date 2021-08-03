@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 import java.util.Optional;
 
 @Repository
-public interface ItemEstoqueRepository extends JpaRepository<StockItem, Long> {
+public interface StockItemRepository extends JpaRepository<StockItem, Long> {
 
     @Query("select id from tb_estoque " +
             "where produto_id = ?1")

@@ -2,6 +2,7 @@ package br.com.pondaria.sistemaVendasPadaria.model.entities.sales;
 
 import br.com.pondaria.sistemaVendasPadaria.exceptions.SaleException;
 import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.OrderStatus;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,7 +29,7 @@ public class Sale {
     private Long id;
 
     @OneToMany(mappedBy = "fatherSale")
-    private List<ItemSale> salesItems;
+    private List<SaleItem> salesItems;
 
     @Column(nullable = false)
     private BigDecimal totalValue;
@@ -63,13 +64,23 @@ public class Sale {
         this.setCompleteMoment(Date.from(Instant.now()));
     }
 
-    public void addItem(ItemSale itemSale){
+    public void addItem(SaleItem saleItem){
         if(orderStatus.equals(null) || (!orderStatus.equals(OrderStatus.INPROGRESS) && !orderStatus.equals(OrderStatus.STARTED))){
             throw new SaleException("Not is possible add a item before sale start");
         }else {
             if(orderStatus.equals(OrderStatus.STARTED)) orderStatus = OrderStatus.INPROGRESS;
-            this.salesItems.add(itemSale);
-            this.setTotalValue(totalValue.add(itemSale.getTotalvalue()));
+            this.salesItems.add(saleItem);
+            this.setTotalValue(totalValue.add(saleItem.getTotalvalue()));
         }
+    }
+
+    public String viewCart(){
+        StringBuilder sb = new StringBuilder();
+        sb.append("Items in cart******************* ").append("\n");
+        for(SaleItem x : salesItems){
+            sb.append(x.itemSaleDetail()).append("\n");
+            sb.append("------------------------------").append("\n");
+        }
+        return sb.toString();
     }
 }

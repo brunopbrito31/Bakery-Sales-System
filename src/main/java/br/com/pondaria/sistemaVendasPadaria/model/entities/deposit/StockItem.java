@@ -21,6 +21,7 @@ public class StockItem {
     private Long id;
 
     @OneToOne
+    @JoinColumn(name = "product_id")
     private Product product;
 
     @Column(nullable = false)
@@ -33,4 +34,8 @@ public class StockItem {
     public void statusInStockUpdate(){
         // implmentar método para atualizkar o status do item no estoque
     }
+
+    //método para adicionar ao estoque
+
+    //método para retirar do estoque - verificar a relação com o banco de dados
 }
