@@ -1,4 +1,4 @@
-package br.com.pondaria.sistemaVendasPadaria.model.entities.usuario;
+package br.com.pondaria.sistemaVendasPadaria.model.entities.users;
 
 import lombok.*;
 

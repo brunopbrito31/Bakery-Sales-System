@@ -1,5 +1,5 @@
 package br.com.pondaria.sistemaVendasPadaria.model.entities.vendas;
-import br.com.pondaria.sistemaVendasPadaria.model.entities.produtos.Produto;
+import br.com.pondaria.sistemaVendasPadaria.model.entities.products.Product;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
@@ -22,7 +22,7 @@ public class ItemVenda {
     private Long id;
 
     @OneToOne
-    private Produto produto;
+    private Product product;
 
     @Column(nullable = false)
     private BigDecimal quantidade;
@@ -37,7 +37,7 @@ public class ItemVenda {
     private Venda vendaPai; // fazer um mapeamento com o id de venda
 
     public String exibirItemVenda(){
-        return produto.exibirParaVenda()+"Quantidade: "+quantidade+"\n"+
+        return product.exibirParaVenda()+"Quantidade: "+quantidade+"\n"+
                 "Valor Total R$: "+vlrTotal+"\n";
     }
 
@@ -47,7 +47,7 @@ public class ItemVenda {
     }
 
     public String exibirParaVenda(){
-        return "Descricao: "+produto.getDescricao()+"\n"+
+        return "Descricao: "+ product.getDescricao()+"\n"+
                 "Quantidade: "+quantidade+"\n"+
                 "Valor R$: "+vlrTotal+"\n";
     }

@@ -2,11 +2,11 @@ package br.com.pondaria.sistemaVendasPadaria.model.entities.enums;
 
 public enum TipoMovimentacao {
 
-    ENTRADA("entrada"),
-    BAIXAINTERNA("baixainterna"),
-    ESTORNO("estorno"),
-    VENDA("venda"),
-    FABRICACAO("fabricao");
+    ENTRY("entry"),
+    MANUFACTUREOUTPUT("manufactureOutput"),
+    CHARGEBACK("chargeback"),
+    SALEOUTPUT("venda");
+    //Estudar a possibilidade de se ter uma devolução de produtos ao estoque por conta do cancelamento de fabricação
 
     private String movimentacaoSelecionada;
 

@@ -1,4 +1,4 @@
-package br.com.pondaria.sistemaVendasPadaria.model.entities.usuario;
+package br.com.pondaria.sistemaVendasPadaria.model.entities.users;
 
 import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.Cargo;
 import lombok.AllArgsConstructor;

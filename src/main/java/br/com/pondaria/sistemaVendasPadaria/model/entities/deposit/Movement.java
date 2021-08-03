@@ -1,8 +1,8 @@
 package br.com.pondaria.sistemaVendasPadaria.model.entities.deposito;
 
 
-import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.TipoMovimentacao;
-import br.com.pondaria.sistemaVendasPadaria.model.entities.produtos.Produto;
+import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.MovementType;
+import br.com.pondaria.sistemaVendasPadaria.model.entities.produtos.Product;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,23 +15,24 @@ import java.util.Date;
 @Data @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity(name = "tb_movimentacao")
-public class Movimentacao {
+@Entity(name = "tb_movement")
+public class Movement {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private TipoMovimentacao tipo;
+    private MovementType tipo;
 
     @Column(name = "data", nullable = false)
-    private Date dataMovimentacao; // Verificar se há necessidade de troca para LocalDateTime
+    private Date movementDate; // Verificar se há necessidade de troca para LocalDateTime
 
     @OneToOne
-    private Produto produtoMovimentado;
+    @JoinColumn(name = "product_id")
+    private Product movementedProduct;
 
     @Column(nullable = false)
-    private BigDecimal quantidade;
+    private BigDecimal quantity;
 
 }
