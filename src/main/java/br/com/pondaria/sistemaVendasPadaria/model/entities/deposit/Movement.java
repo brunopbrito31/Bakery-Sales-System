@@ -23,10 +23,11 @@ public class Movement {
     private Long id;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private MovementType type;
 
     @Column(name = "data", nullable = false)
-    private Date movementDate; // Verificar se há necessidade de troca para LocalDateTime
+    private Date movementDate;
 
     @OneToOne
     @JoinColumn(name = "product_id")

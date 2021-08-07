@@ -9,8 +9,10 @@ import br.com.pondaria.sistemaVendasPadaria.services.StockService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.math.BigDecimal;
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -29,19 +31,23 @@ public class StockController {
     }
 
     @PostMapping("/add/{barcode}")
-    public StockItem addStockItem(@PathVariable String barcode, @RequestBody BigDecimal quantity){
-        return stockService.addStockItemInStock(barcode,quantity, MovementType.ENTRY);
+    public ResponseEntity<StockItem> addStockItem(@PathVariable String barcode, @RequestBody BigDecimal quantity){
+        StockItem stockItem = stockService.addStockItemInStock(barcode,quantity, MovementType.ENTRY);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(stockItem.getId()).toUri();
+        return ResponseEntity.created(uri).body(stockItem);
     }
 
-    @DeleteMapping("/remove/{barcode}")
-    public void removeItem(@PathVariable String barcode, @RequestBody BigDecimal quantity){
-       //Implementar método e verificar declaração
+    @PutMapping("/remove/{barcode}") // método apenas para testar se a remoção está funcionando
+    public ResponseEntity<StockItem> removeItem(@PathVariable String barcode, @RequestBody BigDecimal quantity){
+       StockItem stockItem = stockService.removeItemInStock(barcode,quantity,MovementType.MANUFACTUREOUTPUT);
+       return ResponseEntity.ok().body(stockItem);
     }
 
     @GetMapping("/items")
     public ResponseEntity<List<StockItem>> findAllItems(){
-        //implementar método
-        return null;
+        List<StockItem> all = stockService.showAll();
+        if(all.isEmpty()) return ResponseEntity.notFound().build();
+        else return ResponseEntity.ok().body(all);
     }
 
     @GetMapping("/items/{barcode}")

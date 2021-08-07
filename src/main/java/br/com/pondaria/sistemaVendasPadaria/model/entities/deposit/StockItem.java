@@ -27,6 +27,7 @@ public class StockItem {
     @Column(nullable = false)
     private BigDecimal quantity;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "item_status",nullable = false)
     private ProductStatus productStatus; // aqui representa se o estoque possui esse tipo de produto ativo lá, enquanto nop produto serve para indicar o status do cadastro
 

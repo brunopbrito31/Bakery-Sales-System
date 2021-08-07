@@ -44,9 +44,9 @@ public interface StockItemRepository extends JpaRepository<StockItem, Long> {
     // Atualizado 07/08
     @Transactional
     @Modifying
-    @Query("update tb_stock " +
+    @Query(value = "update tb_stock " +
             "set quantity = ?1, " +
-            "set item_status = ?2" +
-            "where id = ?3")
-    StockItem updateQuantityAndStatus(BigDecimal quantity, ProductStatus productStatus, Long stockId);
+            "item_status = ?2 " +
+            "where id = ?3",nativeQuery = true)
+    void updateQuantityAndStatus(BigDecimal quantity, String productStatus, Long stockId);
 }

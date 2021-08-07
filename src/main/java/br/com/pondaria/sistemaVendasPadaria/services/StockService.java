@@ -41,7 +41,6 @@ public class StockService {
         this.stockMovements = stockMovements;
     }
 
-    // Atualizado 07/08/2021
     public StockItem addStockItemInStock(String barcode, BigDecimal quantity, MovementType movementType) {
         if(quantity.compareTo(BigDecimal.valueOf(0)) < 0) throw new IllegalArgumentException("Invalid quantity!");
         Optional<Product> searchedProduct = productRepository.searchProductByBarcode(barcode);
@@ -58,7 +57,6 @@ public class StockService {
         }
     }
 
-    //Atualizado 07/08/2021
     public StockItem removeItemInStock(String barcode, BigDecimal quantity, MovementType movementType){
         if(quantity.compareTo(BigDecimal.valueOf(0)) < 0) throw new IllegalArgumentException("Invalid quantity!");
         Optional<Product> searchedProduct = productRepository.searchProductByBarcode(barcode);
@@ -70,7 +68,15 @@ public class StockService {
             if(stockItemSearched.isPresent()){
                 if(stockItemSearched.get().getQuantity().compareTo(quantity) < 0) throw new IllegalArgumentException("Não há estoque suficiente :"+stockItemSearched.get().getQuantity());
                 BigDecimal updateQuantity = quantity.multiply(BigDecimal.valueOf(-1));
-                return updateOldStock(searchedProduct.get(),updateQuantity, stockItemSearched.get(),movementType);
+                if(updateQuantity.equals(BigDecimal.valueOf(0))) {
+                    stockItemRepository.deleteById(stockItemSearched.get().getId());
+                    stockItemSearched.get().setQuantity(BigDecimal.valueOf(0));
+                    stockItemSearched.get().setProductStatus(ProductStatus.INACTIVE);
+                    return stockItemSearched.get();
+                }
+                else{
+                    return updateOldStock(searchedProduct.get(),updateQuantity, stockItemSearched.get(),movementType);
+                }
             }else{
                 throw new IllegalArgumentException("Product no exists in stock");
             }
@@ -99,7 +105,8 @@ public class StockService {
         oldStockItemCopy.setQuantity(oldStockItemCopy.getQuantity().add(quantity));
         if(oldStockItemCopy.getQuantity().compareTo(BigDecimal.valueOf(0)) > 0) oldStockItemCopy.setProductStatus(ProductStatus.ACTIVE);
         else oldStockItemCopy.setProductStatus(ProductStatus.INACTIVE);
-        StockItem stockItemUpdated = stockItemRepository.updateQuantityAndStatus(oldStockItemCopy.getQuantity(),oldStockItemCopy.getProductStatus(),oldStockItemCopy.getId());
+        stockItemRepository.updateQuantityAndStatus(oldStockItemCopy.getQuantity(),oldStockItemCopy.getProductStatus().toString(),oldStockItemCopy.getId());
+        StockItem stockItemUpdated = stockItemRepository.searchItemStockByBarcode(productAdd.getBarcode()).get();
         movementRepository.save(Movement.builder()
                 .quantity(quantity)
                 .movementDate(Date.from(Instant.now()))

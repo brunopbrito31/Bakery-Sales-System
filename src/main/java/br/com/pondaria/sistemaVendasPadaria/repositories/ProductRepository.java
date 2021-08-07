@@ -35,11 +35,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Modifying
     @Query(value = "update tb_product " +
             "set description = ?1 " +
-            "where barcode = ?2")
-    Product udpdateDescriptionOfProduct(String description, String barcode);
+            "where barcode = ?2",nativeQuery = true)
+    void udpdateDescriptionOfProduct(String description, String barcode);
 
-    @Query(value = "select id, barcode, description, unitWeight, unitMeasure, costValue, saleValue, status from tb_product where description = ?1", nativeQuery = true)
-    Optional<Product> searchByDescription(String description);
+    @Query(value = "select id, barcode, description, unitWeight, unitMeasure, costValue, saleValue, status from tb_product where description like ?1", nativeQuery = true)
+    List<Product> searchByDescription(String description);
 
     @Query(value = "select id, barcode, description, unitWeight, unitMeasure, costValue, saleValue, status from tb_product where barcode = ?1", nativeQuery = true)
     Optional<Product> searchProductByBarcode(String barcode);
@@ -52,13 +52,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query(value = "update tb_product " +
             "set description = ?1, costValue = ?2, unitWeight = ?3, " +
             "unitMeasure = ?4, saleValue = ?5 " +
-            "where barcode = ?6")
-    Product updateProduct(String description, BigDecimal costValue, BigDecimal unitWight, String unitMeasure, BigDecimal saleValue, String barcode);
+            "where barcode = ?6",nativeQuery = true)
+    void updateProduct(String description, BigDecimal costValue, BigDecimal unitWight, String unitMeasure, BigDecimal saleValue, String barcode);
 
     @Transactional
     @Modifying
     @Query(value = "update tb_product " +
             "set status = ?1 " +
-            "where barcode = ?2")
-    Product updateProductStatus(String status, String barcode);
+            "where barcode = ?2",nativeQuery = true)
+    void updateProductStatus(String status, String barcode);
 }

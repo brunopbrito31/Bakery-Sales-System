@@ -1,4 +1,4 @@
-package br.com.pondaria.sistemaVendasPadaria.resources;
+/*package br.com.pondaria.sistemaVendasPadaria.resources;
 
 import br.com.pondaria.sistemaVendasPadaria.model.entities.dto.response.MessageDTO;
 import br.com.pondaria.sistemaVendasPadaria.model.entities.sales.Sale;
@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+
 
 @RestController
 @RequestMapping("/sales")
@@ -74,3 +75,4 @@ public class SaleController {
         return null;
     }
 }
+*/

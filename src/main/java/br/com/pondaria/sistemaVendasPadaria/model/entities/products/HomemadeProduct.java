@@ -1,4 +1,4 @@
-package br.com.pondaria.sistemaVendasPadaria.model.entities.products;
+/*package br.com.pondaria.sistemaVendasPadaria.model.entities.products;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,3 +32,4 @@ public class HomemadeProduct extends Product {
     // quantos produtos de cada serão necessários, espécie de receita, através de método?
 
 }
+*/

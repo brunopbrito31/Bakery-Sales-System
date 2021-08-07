@@ -1,13 +1,13 @@
 package br.com.pondaria.sistemaVendasPadaria.resources;
 
-import br.com.pondaria.sistemaVendasPadaria.model.entities.dto.response.MessageDTO;
 import br.com.pondaria.sistemaVendasPadaria.model.entities.products.Product;
 import br.com.pondaria.sistemaVendasPadaria.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,7 +24,6 @@ public class ProductController {
         this.productService = service;
     }
 
-    // ok - Testar
     @GetMapping
     public ResponseEntity<List<Product>> returnAllProducts(){
         List<Product> products = productService.showAllCadastredProducts();
@@ -32,22 +31,20 @@ public class ProductController {
         else return ResponseEntity.ok().body(products);
     }
 
-    // ok - Testar
     @PostMapping("/add")
-    @ResponseStatus(HttpStatus.CREATED)
-    public Product addProduct(@RequestBody Product product){
-        return productService.newProduct(product);
+    public ResponseEntity<Product> addProduct(@RequestBody Product product){
+        Product cadastredProduct = productService.newProduct(product);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(cadastredProduct.getId()).toUri();
+        return ResponseEntity.created(uri).body(cadastredProduct);
     }
 
-    // ok - Testar
     @GetMapping("/searchbydescription")
-    public ResponseEntity<Product> searchByDescription(@RequestParam(name = "description") String description){
-        Optional<Product> searchedProduct = productService.searchProductByDescription(description);
-        if(!searchedProduct.isPresent()) return ResponseEntity.notFound().build();
-        else return ResponseEntity.ok().body(searchedProduct.get());
+    public ResponseEntity<List<Product>> searchByDescription(@RequestParam(name = "description") String description){
+        List<Product> searchedProduct = productService.searchProductByDescription(description);
+        if(searchedProduct.isEmpty()) return ResponseEntity.notFound().build();
+        else return ResponseEntity.ok().body(searchedProduct);
     }
 
-    // ok - Testar
     @GetMapping("/searchbybarcode")
     public ResponseEntity<Product> searchByBarcode(@RequestParam(name = "barcode") String barcode){
         Optional<Product> searchedProduct = productService.searchProductByBarcode(barcode);
@@ -55,7 +52,6 @@ public class ProductController {
         else return ResponseEntity.ok().body(searchedProduct.get());
     }
 
-    // ok - Testar
     @GetMapping("/show-allactive")
     public ResponseEntity<List<Product>> returnAllActive(){
         List<Product> allActiveProducts = productService.searchActiveProducts();
@@ -63,7 +59,6 @@ public class ProductController {
         else return ResponseEntity.ok().body(allActiveProducts);
     }
 
-    // ok - Testar
     @GetMapping("/show-allinactive")
     public ResponseEntity<List<Product>> returnAllInactive(){
         List<Product> allInactiveProducts = productService.searchInactiveProducts();
@@ -71,26 +66,31 @@ public class ProductController {
         else return ResponseEntity.ok().body(allInactiveProducts);
     }
 
-
-    @PutMapping("/update/description")
-    public Product updateDescription(@RequestParam(name = "barcode") String barcode, @RequestBody String newDescription){
-        return productService.updateProductDescription(barcode,newDescription);
+    // funciona, só que o retorno ainda traz o objeto antigo na tela - Corrigir
+    @PutMapping("/update/description/{barcode}")
+    public ResponseEntity<Product> updateDescription(@PathVariable String barcode, @RequestBody String newDescription){
+        Product updatedProduct = productService.updateProductDescription(barcode,newDescription);
+        return ResponseEntity.ok().body(updatedProduct);
     }
 
-    @PutMapping("/update/{barcode}")
-    public MessageDTO updateProduct(@PathVariable String barcode, @RequestBody Product newProduct){
-        return null;
+    // funciona, mas precisa por o ID no corpo da requisição - deixar claro para o usuário
+    @PutMapping("/update")
+    public ResponseEntity<Product> updateProduct(@RequestBody Product newProduct){
+        Product updatedProduct = productService.updateProduct(newProduct);
+        return ResponseEntity.ok().body(updatedProduct);
     }
 
+    // funciona, só que o retorno ainda traz o objeto antigo na tela - Corrigir
     @PutMapping("/disable/{barcode}")
-    public MessageDTO disableProduct(@PathVariable String barcode){
-        return null;
+    public ResponseEntity<Product> disableProduct(@PathVariable String barcode){
+        Product disabledProduct = productService.disabeProductcadastry(barcode);
+        return ResponseEntity.ok().body(disabledProduct);
     }
 
     @PutMapping("/enable/{barcode}")
-    public MessageDTO enableProduct(@PathVariable String codBarras){
-        return null;
+    public ResponseEntity<Product> enableProduct(@PathVariable String barcode){
+        Product enabledProduct = productService.activeProductCadastry(barcode);
+        return ResponseEntity.ok().body(enabledProduct);
     }
-
 
 }
