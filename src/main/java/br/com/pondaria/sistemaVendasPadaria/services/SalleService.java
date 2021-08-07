@@ -1,4 +1,4 @@
-package br.com.pondaria.sistemaVendasPadaria.services;
+/*package br.com.pondaria.sistemaVendasPadaria.services;
 
 import br.com.pondaria.sistemaVendasPadaria.model.entities.dto.response.MessageDTO;
 import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.MovementType;
@@ -153,4 +153,4 @@ public class SalleService {
         else return this.venda.getItensVenda().stream().map(x -> x.exibirParaVenda()).collect(Collectors.toList());
     }
 
-}
+}*/

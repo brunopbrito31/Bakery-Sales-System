@@ -13,13 +13,13 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Data @Builder
 @Entity(name = "tb_products")
-public abstract class Product {
+public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "nome", nullable = false)
+    @Column(nullable = false)
     private String description;
 
     @Column(nullable = false)

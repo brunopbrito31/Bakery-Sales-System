@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/products")
@@ -23,40 +24,57 @@ public class ProductController {
         this.productService = service;
     }
 
+    // ok - Testar
     @GetMapping
-    public List<Product> returnAllProducts(){
-        return null;
+    public ResponseEntity<List<Product>> returnAllProducts(){
+        List<Product> products = productService.showAllCadastredProducts();
+        if(products.isEmpty()) return ResponseEntity.notFound().build();
+        else return ResponseEntity.ok().body(products);
     }
 
+    // ok - Testar
     @PostMapping("/add")
     @ResponseStatus(HttpStatus.CREATED)
     public Product addProduct(@RequestBody Product product){
-        return null;
+        return productService.newProduct(product);
     }
 
-    @GetMapping("/searchbydescription/{description}")
-    public ResponseEntity<Product> searchByDescription(@PathVariable String description){
-        return null;
+    // ok - Testar
+    @GetMapping("/searchbydescription")
+    public ResponseEntity<Product> searchByDescription(@RequestParam(name = "description") String description){
+        Optional<Product> searchedProduct = productService.searchProductByDescription(description);
+        if(!searchedProduct.isPresent()) return ResponseEntity.notFound().build();
+        else return ResponseEntity.ok().body(searchedProduct.get());
     }
 
-    @GetMapping("/searchbybarcode/{barcode}")
-    public ResponseEntity<Product> searchByBarcode(@PathVariable String barcode){
-        return null;
+    // ok - Testar
+    @GetMapping("/searchbybarcode")
+    public ResponseEntity<Product> searchByBarcode(@RequestParam(name = "barcode") String barcode){
+        Optional<Product> searchedProduct = productService.searchProductByBarcode(barcode);
+        if(!searchedProduct.isPresent()) return ResponseEntity.notFound().build();
+        else return ResponseEntity.ok().body(searchedProduct.get());
     }
 
-    @GetMapping("/allactive")
-    public List<Product> returnAllActive(){
-        return null;
+    // ok - Testar
+    @GetMapping("/show-allactive")
+    public ResponseEntity<List<Product>> returnAllActive(){
+        List<Product> allActiveProducts = productService.searchActiveProducts();
+        if(allActiveProducts.isEmpty()) return ResponseEntity.notFound().build();
+        else return ResponseEntity.ok().body(allActiveProducts);
     }
 
-    @GetMapping("/allinactive")
-    public List<Product> returnAllInactive(){
-        return null;
+    // ok - Testar
+    @GetMapping("/show-allinactive")
+    public ResponseEntity<List<Product>> returnAllInactive(){
+        List<Product> allInactiveProducts = productService.searchInactiveProducts();
+        if(allInactiveProducts.isEmpty()) return ResponseEntity.notFound().build();
+        else return ResponseEntity.ok().body(allInactiveProducts);
     }
 
-    @PutMapping("/updatedescription/{barcode}")
-    public MessageDTO updateDescription(@PathVariable String barcode, @RequestBody String newDescription){
-        return null;
+
+    @PutMapping("/update/description")
+    public Product updateDescription(@RequestParam(name = "barcode") String barcode, @RequestBody String newDescription){
+        return productService.updateProductDescription(barcode,newDescription);
     }
 
     @PutMapping("/update/{barcode}")

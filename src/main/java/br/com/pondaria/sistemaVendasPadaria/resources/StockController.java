@@ -2,6 +2,7 @@ package br.com.pondaria.sistemaVendasPadaria.resources;
 
 import br.com.pondaria.sistemaVendasPadaria.model.entities.deposit.Movement;
 import br.com.pondaria.sistemaVendasPadaria.model.entities.deposit.StockItem;
+import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.MovementType;
 import br.com.pondaria.sistemaVendasPadaria.repositories.ProductRepository;
 import br.com.pondaria.sistemaVendasPadaria.services.ProductService;
 import br.com.pondaria.sistemaVendasPadaria.services.StockService;
@@ -29,8 +30,7 @@ public class StockController {
 
     @PostMapping("/add/{barcode}")
     public StockItem addStockItem(@PathVariable String barcode, @RequestBody BigDecimal quantity){
-        //Implementar método
-        return null;
+        return stockService.addStockItemInStock(barcode,quantity, MovementType.ENTRY);
     }
 
     @DeleteMapping("/remove/{barcode}")

@@ -1,6 +1,5 @@
 package br.com.pondaria.sistemaVendasPadaria.services;
 
-import br.com.pondaria.sistemaVendasPadaria.model.entities.dto.response.MessageDTO;
 import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.ProductStatus;
 import br.com.pondaria.sistemaVendasPadaria.model.entities.products.Product;
 import br.com.pondaria.sistemaVendasPadaria.repositories.ProductRepository;
@@ -13,99 +12,96 @@ import java.util.Optional;
 @Service
 public class ProductService {
 
-    private ProductRepository repository;
+    private ProductRepository productRepository;
 
     @Autowired
     public ProductService(ProductRepository productRepository){
-        repository = productRepository;
+        this.productRepository = productRepository;
     }
 
-    public MessageDTO criarNovoProduto (Product product){
-        if(verificarExistencia(product)) return MessageDTO.builder().msg("Produto já existente").build();
-        else if(product.getStatus().equals(ProductStatus.INATIVO)) return MessageDTO.builder().msg("Status inválido!").build();
+    //Atualizado dia 07/08/2021
+    public Product newProduct (Product product){
+        Optional<Product> searchedProduct = productRepository.searchProductByBarcode(product.getBarcode());
+        if(searchedProduct.isPresent()) throw new IllegalArgumentException("Product is already in database!");
+        if(product.getStatus().equals(ProductStatus.INACTIVE)) throw new IllegalArgumentException("Not is possible registry of inactive product");
+        Product savedProduct = productRepository.save(searchedProduct.get());
+        return savedProduct;
+    }
+
+    //Atualizado 07/08/2021
+    public List<Product> showAllCadastredProducts(){
+        return productRepository.findAll();
+    }
+
+    //Atualizado 07/08/2021
+    public List<Product> searchActiveProducts(){
+        return productRepository.searchProductsByStatus(String.valueOf(ProductStatus.ACTIVE));
+    }
+
+    //Atualizado 07/08/2021
+    public List<Product> searchInactiveProducts(){
+        return productRepository.searchProductsByStatus(String.valueOf(ProductStatus.INACTIVE));
+    }
+
+    //Atualizado 07/08/2021 - Implementar trim e tolowercase para não quebrar o código com usuários sem formataçaõ
+    public Optional<Product> searchProductByDescription(String description){
+        Optional<Product> searchedProduct = productRepository.searchByDescription(description);
+        return searchedProduct;
+    }
+
+    //Atualizado 07/08/2021
+    public Optional<Product> searchProductByBarcode(String barcode){
+        Optional<Product> searchedProduct = productRepository.searchProductByBarcode(barcode);
+        return searchedProduct;
+    }
+
+    //Atualizado 07/08/2021
+    public Product updateProductDescription(String barcode, String newDescription) {
+        Optional<Product> searchProduct = productRepository.searchProductByBarcode(barcode);
+        if(!searchProduct.isPresent()) throw new IllegalArgumentException("Product not cadastred");
         else{
-            repository.save(product);
-            return MessageDTO.builder().msg("Produto Criado com Sucesso!").build();
+            Product updatedProduct = productRepository.udpdateDescriptionOfProduct(newDescription,barcode);
+            return updatedProduct;
         }
     }
 
-    public List<Product> listarProdutos(){
-        return repository.findAll();
-    }
-
-    private Boolean verificarExistencia(Product product){
-        Integer verificacaoNoBanco = repository.verificar(product.getCodigoBarras());
-        if(verificacaoNoBanco != null && verificacaoNoBanco > 0) return true;
-        else return false;
-    }
-
-    public List<Product> buscarProdutosAtivos(){
-        return repository.buscarProdutosAtivos(String.valueOf(ProductStatus.ATIVO));
-    }
-
-    public List<Product> buscarProdutosInativos(){
-        return repository.buscarProdutosAtivos(String.valueOf(ProductStatus.INATIVO));
-    }
-
-    public Optional<Product> buscarProdutoDescricao(String descricao){
-        Optional<Product> produtoBuscado = repository.buscarPelaDescricao(descricao);
-        return produtoBuscado;
-    }
-
-    public Optional<Product> buscarProdutoCodBarras(String codBarras){
-        Optional<Product> produtoBuscado = repository.buscarPeloCodigoBarras(codBarras);
-        return produtoBuscado;
-    }
-
-    public MessageDTO atualizarProdutoDescricao(String codBarras, String novaDescricao) {
-        Optional<Product> produtoBuscado = repository.buscarPeloCodigoBarras(codBarras);
-        if(!produtoBuscado.isPresent()) return MessageDTO.builder().msg("Produto não cadastrado").build();
+    //Atualizado 07/08/2021
+    public Product updateProduct(Product product) {
+        Optional<Product> searchedProduct = productRepository.findById(product.getId());
+        if(!searchedProduct.isPresent()) searchedProduct = productRepository.searchProductByBarcode(product.getBarcode());
+        if(!searchedProduct.isPresent()) throw new IllegalArgumentException("Product not exists in cadastry");
         else{
-            repository.atualizarDescricaoProduto(novaDescricao,codBarras);
-            return MessageDTO.builder().msg("Atualização realizada com sucesso! "
-                    +repository.buscarPeloCodigoBarras(codBarras).get()).build();
+            Product updatedProduct = productRepository.updateProduct(
+                    product.getDescription(),
+                    product.getCostValue(),
+                    product.getUnitWeight(),
+                    product.getUnitMeasure(),
+                    product.getSaleValue(),
+                    product.getBarcode()
+            );
+            return updatedProduct;
         }
     }
 
-    public MessageDTO atualizarProdutoInteiro(String codBarras, Product novoProduct) {
-        Optional<Product> produtoBuscado = repository.buscarPeloCodigoBarras(codBarras);
-        if(!produtoBuscado.isPresent()) return MessageDTO.builder().msg("Produto não cadastrado").build();
+    //Atualizado 07/08/2021
+    public Product disabeProductcadastry(String barcode){
+        Optional<Product> searchedProduct = productRepository.searchProductByBarcode(barcode);
+        if(!searchedProduct.isPresent()) throw new IllegalArgumentException("Product not cadastred");
+        else if(searchedProduct.get().getStatus().equals(String.valueOf(ProductStatus.INACTIVE))) throw new IllegalArgumentException("Product is already inactive");
         else{
-            repository.atualizarProdutoInteiro(novoProduct.getDescricao(), novoProduct.getValorCusto(),
-                    novoProduct.getPesoUnitario(), novoProduct.getProductFabricado(), novoProduct.getUnidadeMedida(),
-                    novoProduct.getValorDeVenda(),codBarras);
-            return MessageDTO.builder().msg("Atualização realizada com sucesso!").build();
+            Product disabledProduct = productRepository.updateProductStatus(String.valueOf(ProductStatus.INACTIVE),barcode);
+            return disabledProduct;
         }
     }
 
-    //método para inativar um produto
-    public MessageDTO inativarCadastroProduto(String codBarras){
-        Optional<Product> produtoBuscado = repository.buscarPeloCodigoBarras(codBarras);
-        if(!produtoBuscado.isPresent()) return MessageDTO.builder().msg("Produto não cadastrado").build();
-        else if(produtoBuscado.get().getStatus().equals("INATIVO")) return MessageDTO.builder().msg("Produto já está inativo").build();
+    //Atualizado 07/08/2021
+    public Product activeProductCadastry(String barcode){
+        Optional<Product> searchedProduct = productRepository.searchProductByBarcode(barcode);
+        if(!searchedProduct.isPresent()) throw new IllegalArgumentException("Product not cadastred");
+        else if(searchedProduct.get().getStatus().equals(String.valueOf(ProductStatus.ACTIVE))) throw new IllegalArgumentException("Product is already ative");
         else{
-            repository.inativarAtivarCadastroProduto(codBarras,"ATIVO");
-            return MessageDTO.builder().msg("Cadastro do produto foi desativado").build();
+            Product activeProduct = productRepository.updateProductStatus(String.valueOf(ProductStatus.ACTIVE),barcode);
+            return activeProduct;
         }
     }
-
-    public MessageDTO ativarCadastroProduto(String codBarras){
-        Optional<Product> produtoBuscado = repository.buscarPeloCodigoBarras(codBarras);
-        if(!produtoBuscado.isPresent()) return MessageDTO.builder().msg("Produto não cadastrado").build();
-        else if(produtoBuscado.get().getStatus().equals("ATIVO")) return MessageDTO.builder().msg("Produto já está ativo").build();
-        else{
-            repository.inativarAtivarCadastroProduto(codBarras,"INATIVO");
-            return MessageDTO.builder().msg("Cadastro do produto foi ativado").build();
-        }
-    }
-
-    /*public MessageDTO criarNovoProduto (Produto produto){ // backup de cadastar produto
-        if(verificarExistencia(produto)) return MessageDTO.builder().msg("Produto já existente").build();
-        else if(produto.getStatus().equals(StatusProduto.INATIVO)) return MessageDTO.builder().msg("Status inválido!").build();
-        else{
-            repository.save(produto);
-            return MessageDTO.builder().msg("Produto Criado com Sucesso!").build();
-        }
-    }*/
-
 }

@@ -1,6 +1,7 @@
 package br.com.pondaria.sistemaVendasPadaria.repositories;
 
 import br.com.pondaria.sistemaVendasPadaria.model.entities.deposit.StockItem;
+import br.com.pondaria.sistemaVendasPadaria.model.entities.enums.ProductStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -18,11 +19,7 @@ public interface StockItemRepository extends JpaRepository<StockItem, Long> {
             "where produto_id = ?1")
     Long verificar(Long idProduto);
 
-    @Transactional
-    @Modifying
-    @Query("update tb_estoque " +
-            "set quantidade = ?1 " +
-            "where id = ?2")
+
     void atualizarQuantidade(BigDecimal quantidade, Long idItemEstoque);
 
     @Query(value = "select tb_estoque.id from tb_estoque " +
@@ -33,8 +30,8 @@ public interface StockItemRepository extends JpaRepository<StockItem, Long> {
 
      */
 
-    // Pendente de validação Só essa query está quebrando o meu código
-    //Método para retornar um item de estoque pelo código de barras do produto
+
+    // Atualizado 07/08
     @Query(value = "select tb_stock.id, " +
             "tb_stock.item_status, " +
             "tb_stock.quantity, " +
@@ -44,4 +41,12 @@ public interface StockItemRepository extends JpaRepository<StockItem, Long> {
             "where tb_product.barcode = ?1", nativeQuery = true)
     Optional<StockItem> searchItemStockByBarcode(String barcode);
 
+    // Atualizado 07/08
+    @Transactional
+    @Modifying
+    @Query("update tb_stock " +
+            "set quantity = ?1, " +
+            "set item_status = ?2" +
+            "where id = ?3")
+    StockItem updateQuantityAndStatus(BigDecimal quantity, ProductStatus productStatus, Long stockId);
 }

@@ -23,7 +23,7 @@ public class Movement {
     private Long id;
 
     @Column(nullable = false)
-    private MovementType tipo;
+    private MovementType type;
 
     @Column(name = "data", nullable = false)
     private Date movementDate; // Verificar se há necessidade de troca para LocalDateTime
