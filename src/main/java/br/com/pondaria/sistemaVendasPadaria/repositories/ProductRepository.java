@@ -15,6 +15,7 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
 
+    /*
     @Query("select count(descricao) from tb_produto " +
             "where codigo_barras = ?1")
     Integer verificar(String codigoBarras);
@@ -53,12 +54,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
 
     @Query(value = "select id, codigo_barras, nome, peso_unitario, produto_fabricado, unidade_medida, valor_custo, valor_de_venda, status from tb_produto where nome = ?1", nativeQuery = true)
-    Optional<Product> buscarPelaDescricao(String descricao);
+    Optional<Product> buscarPelaDescricao(String descricao);*/
 
-    @Query(value = "select id, codigo_barras, nome, peso_unitario, produto_fabricado, unidade_medida, valor_custo, valor_de_venda, status from tb_produto where codigo_barras = ?1", nativeQuery = true)
-    Optional<Product> buscarPeloCodigoBarras(String codBarras);
+    @Query(value = "select id, barcode, description, unitWeight, unitMeasure, costValue, saleValue, status from tb_product where barcode = ?1", nativeQuery = true)
+    Optional<Product> searchProductByBarcode(String barcode);
 
+    /*
     @Query(value = "select id, codigo_barras, nome, peso_unitario, produto_fabricado, unidade_medida, valor_custo, valor_de_venda, status from tb_produto where status= ?1", nativeQuery = true)
-    List<Product> buscarProdutosAtivos(String status);
+    List<Product> buscarProdutosAtivos(String status);*/
 
 }
